@@ -1,0 +1,67 @@
+---
+title: "Vainqueur Hackathon IBM - Chatbot centre d'aide RAG"
+date: "2025-11-05"
+description: "Pipeline BI intelligent développé lors d'un hackathon IBM : recherche sémantique, RAG et tableau de bord analytique"
+tags: ["RAG (Retrieval Augmented Generation)", "ElasticSearch", "Embeddings", "NLP", "FastAPI", "MariaDB", "Python"]
+github_url: "https://github.com/Corentinjst/IBM-Hackathon-BI-Pipeline"
+cover_image: "/images/projects/hackathon-ibm.png"
+featured: true
+---
+
+## Contexte
+
+Projet réalisé lors d'un hackathon IBM sur la thématique du Business Intelligence. J'ai dirigé une équipe de 4 
+développeurs avec pour mission de concevoir un système de question-answering intelligent s'appuyant sur une 
+base de connaissances existante.
+
+## Problématique
+
+Permettre aux étudiants du Pôle Léonard de Vinci de requêter une base de connaissances (help center) en langage
+naturel, et recevoir des réponses synthétisées et sourcées sans avoir à parcourir
+manuellement les articles.
+
+## Solution
+
+Mise en place d'un système **RAG (Retrieval-Augmented Generation)** couplant une base de
+données relationnelle, un moteur de recherche vectorielle et un LLM :
+
+- **Ingestion** : les contenus du help center sont stockés dans MariaDB et indexés sous
+  forme de vecteurs dans Elasticsearch via l'API d'embeddings d'OpenAI (`text-embedding-3-small`).
+- **Recherche sémantique** : à chaque requête utilisateur, une similarité cosinus est
+  calculée pour retrouver les passages les plus pertinents.
+- **Synthèse** : GPT-4o-mini génère une réponse cohérente à partir des documents récupérés,
+  avec citations des sources.
+- **Feedback loop** : les retours utilisateurs sont enregistrés pour monitorer la qualité
+  des réponses.
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Couche</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Frontend</td><td>Vue.js 3, Vite, Chart.js</td></tr>
+    <tr><td>Backend</td><td>Express.js (Node), FastAPI (Python)</td></tr>
+    <tr><td>Base de données</td><td>MariaDB / MySQL</td></tr>
+    <tr><td>Recherche vectorielle</td><td>Elasticsearch 8.x</td></tr>
+    <tr><td>IA</td><td>OpenAI Embeddings + GPT-4o-mini</td></tr>
+  </tbody>
+</table>
+
+Deux applications distinctes ont été développées :
+- **App Admin** - gestion du contenu, dashboard analytique, suivi des feedbacks
+- **App User** - interface publique de recherche et de Q&A
+
+## Mon rôle
+
+En tant que **team leader**, j'ai coordonné les développements au sein de l'équipe,
+défini l'architecture globale du projet et supervisé l'intégration des différentes
+briques techniques (pipeline RAG, synchronisation Elasticsearch/MariaDB, API unifiée).
+
+## Certifications IBM obtenues
+
+- IBM Watsonx Technical Essentials
+- IBM Watsonx Data Technical Essentials
+- Generative AI in Action
+- Getting Started with Generative AI

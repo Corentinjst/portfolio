@@ -1,0 +1,97 @@
+---
+title: "Customer Revenue Prediction"
+date: "2024-12-08"
+description: "Prédiction du revenu par session du Google Merchandise Store à partir de données Google Analytics"
+tags: ["Python", "Scikit-learn", "LightGBM", "XGBoost", "TensorFlow", "Feature Engineering"]
+github_url: "https://github.com/Guereak/customer-revenue-prediction"
+cover_image: "/images/projects/customer-revenue-prediction.jpeg"
+featured: false
+---
+
+## Contexte
+
+Projet académique (ESILV A4) de prédiction du revenu transactionnel par session sur le
+**Google Merchandise Store**. Le dataset provient de **Google Analytics** et contient
+~900 000 sessions avec des colonnes encodées en JSON.
+L'objectif : prédire `totalTransactionRevenue` pour chaque session.
+
+## Problématique
+
+Le dataset présente un **déséquilibre extrême** : ~98.7% des sessions ont un revenu nul.
+Les colonnes brutes sont imbriquées en JSON multi-niveaux, avec de nombreuses valeurs
+manquantes et des variables catégorielles à très haute cardinalité. Le défi est d'extraire
+un signal prédictif exploitable malgré cette distribution fortement asymétrique.
+
+## Solution
+
+Pipeline en 3 stages itératifs, du preprocessing brut jusqu'à l'ensembling de modèles tunés :
+
+- **Expansion JSON** : extraction récursive des colonnes JSON imbriquées (device,
+  geoNetwork, totals, trafficSource, adwordsClickInfo) en features tabulaires exploitables.
+- **Preprocessing robuste** : suppression des colonnes "not available in demo dataset",
+  drop par seuil de nullité, imputation multi-stratégie (most frequent, constant, médiane),
+  réduction de cardinalité et one-hot encoding.
+- **Feature engineering** : agrégats visiteur (somme/moyenne/écart-type des pageviews),
+  features temporelles (heure locale via mapping timezone par sous-continent, jour de semaine),
+  PIB par pays (données Banque Mondiale), taux de churn mensuel, consolidation des sources
+  de trafic et flags binaires Google.
+- **Transformation cible** : application de `log1p` sur le revenu pour stabiliser la
+  distribution et faciliter l'apprentissage.
+- **Rééchantillonnage** : expérimentation SMOTE et undersampling
+  pour traiter le déséquilibre ; conclusion que les données originales performent mieux.
+- **Prédiction user-level** : agrégation des sessions par `fullVisitorId` pour capturer
+  le comportement global de chaque visiteur.
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Couche</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Données</td><td>Google Analytics (train_v2.csv), World Bank GDP</td></tr>
+    <tr><td>Preprocessing</td><td>Pandas, NumPy, Scikit-learn (SimpleImputer, OneHotEncoder)</td></tr>
+    <tr><td>Feature Engineering</td><td>Pandas groupby/merge, pytz (timezone), imbalanced-learn (SMOTE)</td></tr>
+    <tr><td>Modèles ML</td><td>LightGBM, XGBoost, RandomForest, ExtraTrees, Ridge, SVR</td></tr>
+    <tr><td>Deep Learning</td><td>TensorFlow/Keras (MLP), keras-tuner</td></tr>
+    <tr><td>Ensembling</td><td>StackingRegressor, BaggingRegressor, VotingRegressor</td></tr>
+    <tr><td>Tuning</td><td>RandomizedSearchCV, keras-tuner</td></tr>
+    <tr><td>Visualisation</td><td>Matplotlib, Seaborn</td></tr>
+  </tbody>
+</table>
+
+## Démarche itérative
+
+Trois stages de complexité croissante :
+
+- **Stage 1** : Preprocessing complet et modèles de base : Random Forest, Linear
+  Regression, LightGBM, SVR. Mise en place du pipeline reproductible et de l'EDA
+  (corrélations, PCA, distributions).
+- **Stage 2** : Feature engineering (8 nouvelles features), comparaison avant/après
+  sur les modèles. Les nouvelles features représentent **42.6% de l'importance** dans
+  le Random Forest. Introduction des techniques d'ensembling (Bagging, Stacking, Voting).
+- **Stage 3** : Hyperparameter tuning via RandomizedSearchCV sur les 4 meilleurs modèles,
+  expérimentation SMOTE/undersampling, prédiction user-level, réseau de neurones (MLP Keras
+  avec tuning d'architecture), et ensembling final des modèles tunés.
+
+## Résultats
+
+<table>
+  <thead>
+    <tr><th>Approche</th><th>RMSE (log-revenue)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Dummy Baseline</td><td>~1.70</td></tr>
+    <tr><td>LightGBM (sans feature eng.)</td><td>~1.53</td></tr>
+    <tr><td>LightGBM (avec feature eng.)</td><td>~1.49</td></tr>
+    <tr><td>Bagging (LightGBM)</td><td>~1.49</td></tr>
+    <tr><td>MLP Keras (tuné)</td><td>~1.48</td></tr>
+    <tr><td>Stacking (RF + XGB + LGBM + ExtraTrees)</td><td><strong>~1.48</strong></td></tr>
+  </tbody>
+</table>
+
+Le **StackingRegressor** combinant Random Forest, XGBoost, LightGBM et ExtraTrees avec
+un méta-learner LinearRegression obtient les meilleures performances. Le feature engineering
+apporte un gain significatif sur tous les modèles, et les techniques d'ensembling permettent
+de grappiller les derniers points de RMSE. L'expérimentation SMOTE/undersampling a montré
+que ces techniques dégradent les performances sur ce type de distribution.

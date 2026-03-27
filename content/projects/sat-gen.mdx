@@ -1,0 +1,80 @@
+---
+title: "SatGen - Generation d'images satellites"
+date: "2026-01-23"
+description: "Génération d'images satellites réalistes à partir de masques de segmentation de routes et de bâtiments"
+tags: ["Python", "PyTorch", "Deep Learning", "GAN", "Computer Vision", "Hugging Face", "TensorBoard"]
+github_url: "https://github.com/Guereak/SatGen-CV"
+cover_image: "/images/projects/sat-gen.png"
+featured: false
+---
+
+## Contexte
+
+Projet de **Computer Vision** réalisé en dernière année d'école d'ingénieur (ESILV A5).
+L'objectif : générer des **images satellites photoréalistes** à partir de simples masques de
+segmentation indiquant les routes et les bâtiments. Le modèle permet de synthétiser des images
+de **taille arbitraire** sans coutures visibles, ouvrant la voie à la création de données
+synthétiques pour l'entraînement de modèles de détection aérienne.
+
+## Problématique
+
+Les images satellites annotées sont rares et coûteuses à produire. Générer des images réalistes
+à partir de masques de segmentation permettrait d'augmenter massivement les datasets existants.
+Le défi principal est double : produire des images visuellement convaincantes à l'échelle du
+patch (256×256), puis les assembler en images de grande taille **sans artefacts de bordure**.
+
+## Solution
+
+Pipeline complet de **Pix2Pix conditionnel** (cGAN) avec plusieurs innovations :
+
+- **Entrée bi-canal** : les routes (canal 0) et bâtiments (canal 1) sont séparés en deux
+  canaux distincts, offrant un contrôle fin sur la génération.
+- **Générateur U-Net** (~54M paramètres) : 8 blocs d'encodage/décodage avec skip connections,
+  Instance Normalization et dropout conservé à l'inférence pour la diversité stochastique.
+- **Discriminateur PatchGAN** : classification par patches 70×70 avec Spectral Normalization
+  pour la stabilité d'entraînement.
+- **Perceptual Loss multi-couche** : extraction de features VGG-19 sur 5 niveaux pour
+  préserver les textures naturelles au-delà de la simple reconstruction pixel-à-pixel.
+- **Blending cosine-fade** : assemblage seamless de patches avec 50% d'overlap et transition
+  en cosinus, éliminant les coutures visibles sur les images de grande taille.
+- **SAM3 (Segment Anything Model)** : génération automatique de masques complémentaires
+  pour enrichir les annotations existantes via weak supervision.
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Couche</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Données</td><td>Massachusetts Roads Dataset, Inria Aerial Image Labeling, SAM3</td></tr>
+    <tr><td>Preprocessing</td><td>NumPy, OpenCV, Pillow, encodage bi-canal</td></tr>
+    <tr><td>Modèle</td><td>Pix2Pix (U-Net + PatchGAN), PyTorch</td></tr>
+    <tr><td>Losses</td><td>Adversarial (BCE) + L1 + Perceptual (VGG-19)</td></tr>
+    <tr><td>Inférence</td><td>SeamlessGenerator, cosine-fade blending, noise strategies</td></tr>
+    <tr><td>API</td><td>FastAPI, déploiement sur Hugging Face Hub</td></tr>
+    <tr><td>Monitoring</td><td>TensorBoard, notebooks Jupyter</td></tr>
+  </tbody>
+</table>
+
+## Choix techniques clés
+
+- **Instance Normalization** plutôt que BatchNorm pour s'affranchir de la dépendance à la
+  taille du batch et permettre une inférence flexible.
+- **Spectral Normalization** sur le discriminateur pour éviter qu'il ne domine l'entraînement.
+- **Label smoothing** (real=0.9) pour prévenir le mode collapse.
+- **Dropout à l'inférence** : choix volontaire propre à Pix2Pix, permettant de générer des
+  variations stochastiques à chaque appel.
+- **Cosine Annealing** du learning rate avec η_min = 1e-6 pour un entraînement stable.
+- **Stratégies de bruit** multiples (Gaussien, Uniforme, Sparse, Per-Channel) pour les zones
+  vides du masque, évitant les artefacts de génération.
+
+## Résultats
+
+L'agent génère des images satellites visuellement réalistes avec des textures cohérentes pour
+les routes, bâtiments et végétation. Le pipeline de blending seamless produit des images de
+taille arbitraire sans coutures visibles, validant l'approche pour la génération de données
+synthétiques à grande échelle.
+
+Le modèle est disponible sur le **Hugging Face Hub** et accessible via une **API REST FastAPI**
+ainsi qu'une **interface web interactive**.

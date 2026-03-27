@@ -1,0 +1,94 @@
+---
+title: "Voice Assistant AI Agent"
+date: "2026-01-15"
+description: "Assistant vocal multi-agents pour la restauration, avec support multilingue, intégration téléphonique, RAG et dashboard analytics"
+tags: ["Python", "LangChain", "LangGraph", "RAG (Retrieval Augmented Generation)", "PostgreSQL", "ChromaDB", "Twilio"]
+github_url: "https://github.com/Noway92/Voice-Assistant-AI-Agent"
+cover_image: "/images/projects/voice-assistant.png"
+featured: false
+---
+
+## Contexte
+
+Projet de groupe réalisé dans le cadre du cours **LLM & Generative AI** à l'ESILV (A5).
+L'objectif : concevoir un **assistant vocal intelligent** capable de gérer les interactions
+clients d'un restaurant comme la prise de réservations, les commandes et les renseignements, par la voix
+ou par téléphone, en plusieurs langues.
+
+## Problématique
+
+Un restaurant reçoit des demandes variées (réservations, commandes, questions sur le menu,
+horaires, allergènes…) dans potentiellement plusieurs langues. Automatiser ces interactions
+vocales nécessite de coordonner reconnaissance vocale, compréhension du langage naturel,
+accès aux données métier et synthèse vocale, tout en maintenant un dialogue cohérent et
+contextuel.
+
+## Solution
+
+Architecture **multi-agents** orchestrée par LangGraph, où chaque type de requête est
+routé vers un agent spécialisé :
+
+- **Orchestrateur** : classifie l'intention de l'utilisateur (réservation, commande,
+  renseignement) et route vers le bon agent. Gère l'historique de conversation et
+  implémente une logique de retry en cas d'erreur.
+- **Agent Réservation** : vérifie la disponibilité des tables, crée, modifie ou annule
+  des réservations via des outils connectés à la base PostgreSQL.
+- **Agent Commande** : gère le cycle complet d'une commande (création, ajout/modification
+  d'items, finalisation) avec support dine-in, takeaway et delivery.
+- **Agent Renseignement (RAG)** : répond aux questions générales (menu, horaires,
+  localisation, allergènes, offres spéciales) grâce à un système de **Retrieval-Augmented
+  Generation** basé sur ChromaDB.
+
+### Pipeline vocal
+
+1. **Speech-to-Text** - Whisper (OpenAI) ou Vosk (offline)
+2. **Détection de langue** - langdetect + traduction automatique vers l'anglais
+3. **Traitement par l'agent** - raisonnement et exécution d'outils (pattern ReAct)
+4. **Traduction retour** - réponse traduite dans la langue d'origine
+5. **Text-to-Speech** - OpenAI TTS, pyttsx3 (offline) ou modèle XTTS custom fine-tuné
+
+### Deux modes de déploiement
+
+- **Mode ordinateur** : interaction vocale directe via microphone et haut-parleurs
+- **Mode téléphone** : intégration Twilio avec serveur Flask de webhooks et tunneling ngrok
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Couche</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Speech-to-Text</td><td>OpenAI Whisper, Vosk</td></tr>
+    <tr><td>Orchestration IA</td><td>LangChain, LangGraph, OpenAI GPT-4o-mini, Ollama (offline)</td></tr>
+    <tr><td>RAG</td><td>ChromaDB, OpenAI Embeddings (text-embedding-3-small)</td></tr>
+    <tr><td>Base de données</td><td>PostgreSQL, SQLAlchemy</td></tr>
+    <tr><td>Téléphonie</td><td>Twilio, Flask, ngrok</td></tr>
+    <tr><td>Text-to-Speech</td><td>OpenAI TTS, pyttsx3, XTTS custom (PyTorch + CUDA)</td></tr>
+    <tr><td>Multilingue</td><td>langdetect, deep-translator</td></tr>
+    <tr><td>Dashboard</td><td>Streamlit, Pandas</td></tr>
+    <tr><td>Évaluation</td><td>RAGAS, pytest</td></tr>
+  </tbody>
+</table>
+
+## Fonctionnalités clés
+
+- **Support multilingue** : détection automatique de la langue et traduction
+  transparente, permettant aux clients de s'exprimer dans leur langue maternelle.
+- **RAG contextuel** : base de connaissances vectorielle (ChromaDB) alimentée par les
+  données du restaurant pour des réponses précises et à jour.
+- **Dashboard analytics** : interface Streamlit pour le suivi des KPIs (réservations,
+  commandes, revenus, gestion du menu et des tables).
+- **TTS custom** : modèle XTTS fine-tuné sur Hugging Face pour une voix personnalisée
+  et naturelle, avec accélération GPU.
+- **Mode offline** : fonctionnement sans connexion internet grâce à Ollama (LLM local),
+  Vosk (STT) et pyttsx3 (TTS).
+
+## Évaluation
+
+Un framework d'évaluation complet a été mis en place :
+
+- **Classification d'intention** : précision du routage vers le bon agent
+- **Taux de succès des agents** : capacité à accomplir les tâches demandées
+- **Métriques RAG** : MRR, Precision@K, Hit Rate via le framework RAGAS
+- **Tests end-to-end** : scénarios conversationnels complets avec historique

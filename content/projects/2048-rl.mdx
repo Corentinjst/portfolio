@@ -1,0 +1,85 @@
+---
+title: "2048 - Reinforcement Learning"
+date: "2026-03-02"
+description: "Agent de deep reinforcement learning jouant au jeu 2048 grâce à MaskablePPO, un custom CNN et du reward shaping"
+tags: ["Python", "Reinforcement Learning", "PyTorch", "Stable-Baselines3", "Gymnasium", "TensorBoard"]
+github_url: "https://github.com/Corentinjst/2048-RL"
+cover_image: "/images/projects/2048-rl.png.avif"
+featured: true
+---
+
+## Contexte
+
+Projet personnel visant à entraîner un agent par **reinforcement learning** à jouer au jeu
+**2048**. L'objectif : partir de zéro et atteindre la tuile 2048 (voire au-delà) de manière
+autonome, en itérant sur l'architecture du modèle, le reward shaping et les hyperparamètres.
+
+## Problématique
+
+Le 2048 est un jeu à information complète avec un espace d'états très large (~3.5 × 10³⁰
+configurations possibles). L'agent doit apprendre des stratégies non triviales : maintenir
+les tuiles ordonnées, garder le plateau ouvert et planifier des fusions en chaîne, uniquement
+à partir de l'expérience de jeu.
+
+## Solution
+
+Mise en place d'un pipeline d'entraînement complet basé sur **MaskablePPO**
+(Proximal Policy Optimization avec masquage des actions invalides) :
+
+- **Environnement Gymnasium** : le plateau de jeu est encapsulé dans un environnement
+  compatible avec l'écosystème RL standard, avec des wrappers chaînés pour le preprocessing,
+  le reward shaping et le masquage d'actions.
+- **Encodage one-hot** : chaque case du plateau est transformée en sa puissance de 2 puis
+  encodée en one-hot sur 16 canaux, produisant un tenseur `(16, 4, 4)` adapté au traitement
+  par convolution.
+- **CNN custom** : un extracteur de features à 2 couches convolutives capte les patterns
+  spatiaux du plateau (alignements, clusters de tuiles), suivi de têtes séparées pour
+  l'acteur et le critique.
+- **Reward shaping** : récompense composite intégrant les fusions (superlinéaire),
+  les cases vides, la monotonie du plateau et un bonus de survie.
+- **VecNormalize** : normalisation des récompenses à moyenne nulle et variance unitaire,
+  réduisant la value_loss d'un facteur 68 000× et débloquant l'apprentissage.
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Couche</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Environnement</td><td>Gymnasium, NumPy</td></tr>
+    <tr><td>Wrappers RL</td><td>RewardShaping, Preprocessing (one-hot), ActionMasking</td></tr>
+    <tr><td>Modèle</td><td>MaskablePPO (sb3-contrib), PyTorch</td></tr>
+    <tr><td>Réseau</td><td>CNN 2×Conv2d(128) + MLP acteur/critique</td></tr>
+    <tr><td>Monitoring</td><td>TensorBoard, Pygame (visualisation live)</td></tr>
+    <tr><td>Tests</td><td>pytest (117 tests unitaires)</td></tr>
+  </tbody>
+</table>
+
+## Démarche itérative
+
+Trois configurations ont été développées et comparées via des runs de 3M steps :
+
+- **V1** - Baseline PPO avec reward linéaire : plateau à 256-512, value_loss instable.
+- **V2** - Reward superlinéaire `log2(score)²`, LR schedule, critique élargi : toujours
+  bloqué à 512 à cause d'une value_loss explosive (~2 153).
+- **V3** - Ajout de **VecNormalize** sur les récompenses, réduction de n_epochs (10→4),
+  augmentation de n_steps (2048→4096) : value_loss ramenée à 0.03, apprentissage stable.
+
+## Résultats
+
+<table>
+  <thead>
+    <tr><th>Métrique</th><th>V2 (3M steps)</th><th>V3 (3M steps)</th><th>V3 (30M steps)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Score moyen (100 ep.)</td><td>3 735</td><td>9 474</td><td><strong>27 461</strong></td></tr>
+    <tr><td>Tuile max</td><td>256-512</td><td>512-709</td><td><strong>2 048 - 4 096</strong></td></tr>
+    <tr><td>Value loss</td><td>2 153</td><td>0.03</td><td><strong>0.0185</strong></td></tr>
+    <tr><td>Explained variance</td><td>0.68</td><td>0.86</td><td><strong>0.9025</strong></td></tr>
+  </tbody>
+</table>
+
+Après 30M steps d'entraînement, l'agent **atteint systématiquement la tuile 2048** et a
+réalisé la **tuile 4096** (score de 60 496 en une seule partie). Aucun plateau observé,
+toutes les métriques sont encore en progression.
