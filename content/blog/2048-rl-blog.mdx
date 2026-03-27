@@ -1,0 +1,224 @@
+---
+title: "Apprendre à un agent à jouer au 2048 : du plateau à 512 jusqu'à la tuile 4096"
+date: "2026-03-20"
+description: "Retour d'expérience sur l'entraînement d'un agent de reinforcement learning : les fausses pistes, les bons outils, et les leçons qu'on n'apprend qu'en pratique."
+tags: ["Python", "Reinforcement Learning", "PyTorch", "Stable-Baselines3", "Gymnasium", "TensorBoard"]
+---
+
+Score moyen : 3 500. Tuile max : 512. Dix millions de steps d'entraînement, et mon agent PPO refusait d'aller plus loin. Six runs de comparaison, trois versions du modèle, et un diagnostic TensorBoard plus tard : un changement de 4 lignes a triplé le score et débloqué la tuile **4096**.
+
+## Le problème : un jeu simple, un espace d'états immense
+
+Traduit en reinforcement learning, le 2048 c'est 4 actions, une observation `(4, 4)`, et environ 3.5 × 10³⁰ états possibles. La difficulté : les récompenses utiles sont rares. Les stratégies gagnantes - garder les grosses tuiles dans un coin, maintenir un gradient - ne paient que des centaines de coups plus tard.
+
+## V1 - La baseline qui plafonne
+
+La première chose que j'ai essayée : un **MaskablePPO** avec une configuration standard.
+
+Pourquoi MaskablePPO ? À chaque état, certaines directions ne déplacent aucune tuile. Plutôt que de laisser l'agent *apprendre* à les éviter, MaskablePPO fournit un masque booléen des actions valides : les logits invalides passent à `-inf` avant le softmax.
+
+```python
+class ActionMaskWrapper(gym.Wrapper):
+    def action_masks(self) -> np.ndarray:
+        inner_board = self.unwrapped._board
+        masks = np.zeros(4, dtype=bool)
+        for action in self._ACTIONS:
+            test = Board()
+            test._board = inner_board.get_board()
+            test._score = inner_board.get_score()
+            masks[action] = test.move(action)
+        return masks
+```
+
+Chaque action est testée sur une *copie* du plateau. Le taux d'actions invalides tombe à zéro dès le début de l'entraînement.
+
+### L'encodage : voir le plateau autrement
+
+Les valeurs brutes (0, 2, 4, ..., 2048) couvrent une plage énorme. J'ai opté pour un encodage **log2 + one-hot** : chaque case devient sa puissance de 2, encodée en one-hot sur 16 canaux → tenseur `(16, 4, 4)`.
+
+Le 2048 est spatial et prend en compte l'adjacence des tuiles, les patterns en coin, et les gradients de valeurs. Un CNN s'impose. Deux couches avec un kernel de taille 2, juste assez pour capter les relations entre tuiles voisines :
+
+```python
+class CNN2048FeaturesExtractor(BaseFeaturesExtractor):
+    def __init__(self, observation_space, features_dim=256):
+        super().__init__(observation_space, features_dim)
+        self.cnn = nn.Sequential(
+            nn.Conv2d(16, 128, kernel_size=2, padding=1),  # (16,4,4) → (128,5,5)
+            nn.ReLU(),
+            nn.Conv2d(128, 128, kernel_size=2),            # (128,5,5) → (128,4,4)
+            nn.ReLU(),
+            nn.Flatten(),                                   # → 2048
+        )
+        self.linear = nn.Sequential(
+            nn.Linear(2048, features_dim),                  # 2048 → 256
+            nn.ReLU(),
+        )
+```
+
+Les 256 features alimentent deux têtes : un acteur `[128, 128] → 4 logits` et un critique `[256, 256] → 1 valeur`. Le critique est plus large car prédire les retours à long terme est plus difficile que choisir une direction.
+
+### Reward shaping : quatre signaux
+
+La récompense brute du jeu (le score) est trop éparse. J'ai ajouté quatre composantes :
+
+```python
+reward = w_merge * r_merge + w_empty * r_empty + w_mono * r_mono + r_survival
+```
+
+- **Merge** : `log2(score_gained)` - récompense logarithmique pour chaque fusion
+- **Empty** : `empty_cells / 16` - encourage à garder le plateau ouvert
+- **Monotonie** : mesure l'alignement croissant/décroissant des tuiles sur les lignes et colonnes (caractéristique des bons plateaux 2048)
+- **Pénalité invalide** : `-1.0` si le coup ne déplace rien (garde-fou, rarement activé grâce au masquage)
+
+### Résultat : plateau à 512
+
+<table>
+<thead><tr><th>Paramètre</th><th>Valeur</th></tr></thead>
+<tbody>
+<tr><td>Learning rate</td><td>3e-4</td></tr>
+<tr><td>n_steps</td><td>2048</td></tr>
+<tr><td>n_epochs</td><td>10</td></tr>
+<tr><td>ent_coef</td><td>0.0</td></tr>
+<tr><td>Merge reward</td><td><code>log2(score)</code> (linéaire)</td></tr>
+<tr><td>VecNormalize</td><td>Non</td></tr>
+</tbody>
+</table>
+
+Après 10M steps sur 8 environnements parallèles, le score moyen stagnait à **~3 500** et la tuile max restait bloquée à **512**. L'agent avait appris les bases : fusionner et garder de l'espace. Mais il ne construisait pas les chaînes de fusions nécessaires pour dépasser 512.
+
+TensorBoard montrait deux problèmes :
+
+1. **Entropy collapse** : sans bonus d'entropie (`ent_coef=0`), la politique convergeait trop vite vers un comportement déterministe. L'agent cessait d'explorer.
+2. **Reward trop plat** : avec un reward linéaire, l'écart entre fusionner deux 2 et deux 512 n'était pas assez marqué pour orienter l'agent vers les grosses fusions.
+
+## V2 - Quatre corrections, toujours bloqué
+
+J'ai apporté quatre modifications ciblées :
+
+1. **`ent_coef = 0.01`** - force l'agent à maintenir un minimum d'exploration
+2. **Reward superlinéaire** - `log2(score)²` au lieu de `log2(score)`, pour creuser l'écart entre petites et grosses fusions :
+
+<table>
+<thead><tr><th>Fusion</th><th style={{textAlign:'right'}}>Score</th><th style={{textAlign:'right'}}>Reward linéaire</th><th style={{textAlign:'right'}}>Reward superlinéaire</th></tr></thead>
+<tbody>
+<tr><td>2 + 2 → 4</td><td style={{textAlign:'right'}}>4</td><td style={{textAlign:'right'}}>2.0</td><td style={{textAlign:'right'}}>4.0</td></tr>
+<tr><td>64 + 64 → 128</td><td style={{textAlign:'right'}}>128</td><td style={{textAlign:'right'}}>7.0</td><td style={{textAlign:'right'}}>49.0</td></tr>
+<tr><td>1024 + 1024 → 2048</td><td style={{textAlign:'right'}}>2048</td><td style={{textAlign:'right'}}>11.0</td><td style={{textAlign:'right'}}><strong>121.0</strong></td></tr>
+</tbody>
+</table>
+
+3. **Critique élargi** - tête `[256, 256]` au lieu de la taille par défaut
+4. **LR schedule** - learning rate décroissant de 3e-4 à 5e-5
+
+Pour isoler l'impact de chaque changement, j'ai lancé trois runs de comparaison à 3M steps :
+
+<table>
+<thead><tr><th>Run</th><th>Changement</th><th style={{textAlign:'right'}}>score_mean_100</th><th style={{textAlign:'right'}}>max_tile</th><th style={{textAlign:'right'}}>value_loss</th></tr></thead>
+<tbody>
+<tr><td>A</td><td><code>ent_coef=0.01</code> seul</td><td style={{textAlign:'right'}}>3 634</td><td style={{textAlign:'right'}}>256–512</td><td style={{textAlign:'right'}}>137</td></tr>
+<tr><td>B</td><td>Superlinéaire seul</td><td style={{textAlign:'right'}}>3 735</td><td style={{textAlign:'right'}}>256–512</td><td style={{textAlign:'right'}}><strong>2 153</strong></td></tr>
+<tr><td>C</td><td>Tout combiné</td><td style={{textAlign:'right'}}>~2 500</td><td style={{textAlign:'right'}}>128–256</td><td style={{textAlign:'right'}}>~1 000</td></tr>
+</tbody>
+</table>
+
+Aucune des trois configurations ne dépassait 512. Le run C avec toutes les corrections combinées était le pire : le LR schedule conçu pour 10M steps décroissait trop vite sur 3M.
+
+Mais le chiffre révélateur était la **value_loss du run B : 2 153**. Le reward superlinéaire créait un problème que je n'avais pas anticipé.
+
+## V3 - VecNormalize, le game-changer
+
+### Le diagnostic
+
+La value_loss mesure à quel point le critique se trompe dans ses prédictions de retours futurs. Une value_loss de 2 153 signifie que le critique est perdu.
+
+La cause : `log2(score)²` crée des valeurs allant de **4** (fusion de deux 2) à **121** (fusion de deux 1024). Avec γ = 0.99, les retours cumulés atteignent des milliers. Le critique n'arrive pas à régresser sur cette plage dynamique.
+
+### La solution
+
+J'ai fini par trouver le facteur manquant : **VecNormalize**, un wrapper de stable-baselines3 qui maintient des statistiques courantes (moyenne, variance) et normalise les récompenses en temps réel à moyenne nulle et variance unitaire.
+
+```python
+if config.use_vec_normalize:
+    vec_env = VecNormalize(
+        vec_env,
+        norm_obs=False,       # l'observation est déjà en [0, 1] (one-hot)
+        norm_reward=True,     # normaliser les récompenses
+        clip_reward=10.0,     # clipper les extrêmes
+        gamma=config.gamma,
+    )
+```
+
+Un détail : `norm_obs=False`. L'observation one-hot est déjà dans [0, 1] donc la normaliser détruirait sa structure binaire.
+
+### L'ablation
+
+Pour confirmer que VecNormalize était le facteur décisif, j'ai lancé un run d'ablation : la config V3 complète *avec* VecNormalize (run D) contre la même config *sans* (run E).
+
+<table>
+<thead><tr><th>Métrique</th><th style={{textAlign:'right'}}>D - avec VecNormalize</th><th style={{textAlign:'right'}}>E - sans VecNormalize</th><th>Impact</th></tr></thead>
+<tbody>
+<tr><td>score_mean_100</td><td style={{textAlign:'right'}}><strong>9 474</strong></td><td style={{textAlign:'right'}}>2 533</td><td><strong>3.7x</strong></td></tr>
+<tr><td>max_tile</td><td style={{textAlign:'right'}}><strong>512–709</strong></td><td style={{textAlign:'right'}}>~267</td><td></td></tr>
+<tr><td>value_loss</td><td style={{textAlign:'right'}}><strong>0.03</strong></td><td style={{textAlign:'right'}}>2 044</td><td><strong>68 000x</strong></td></tr>
+<tr><td>explained_variance</td><td style={{textAlign:'right'}}><strong>0.86</strong></td><td style={{textAlign:'right'}}>0.78</td><td></td></tr>
+</tbody>
+</table>
+
+Bien que les ajustements PPO (n_epochs, n_steps, gae_lambda) aient contribué, ils ne suffisaient pas seuls. VecNormalize était **le** facteur qui brisait le plateau.
+
+### Ajustements complémentaires
+
+<table>
+<thead><tr><th>Paramètre</th><th style={{textAlign:'right'}}>V2</th><th style={{textAlign:'right'}}>V3</th><th>Motivation</th></tr></thead>
+<tbody>
+<tr><td>n_epochs</td><td style={{textAlign:'right'}}>10</td><td style={{textAlign:'right'}}><strong>4</strong></td><td>Réduit le sur-apprentissage par batch</td></tr>
+<tr><td>n_steps</td><td style={{textAlign:'right'}}>2048</td><td style={{textAlign:'right'}}><strong>4096</strong></td><td>Meilleures estimations de gradient</td></tr>
+<tr><td>gae_lambda</td><td style={{textAlign:'right'}}>0.95</td><td style={{textAlign:'right'}}><strong>0.9</strong></td><td>Réduit la variance des avantages</td></tr>
+<tr><td>LR schedule</td><td style={{textAlign:'right'}}>3e-4 → 5e-5</td><td style={{textAlign:'right'}}><strong>2.5e-4 fixe</strong></td><td>Plus stable sur les longs runs</td></tr>
+<tr><td>w_survival</td><td style={{textAlign:'right'}}>0.01</td><td style={{textAlign:'right'}}><strong>0.005</strong></td><td>Le bonus était trop dominant</td></tr>
+</tbody>
+</table>
+
+## Résultats : de 512 à 4096
+
+J'ai entraîné le modèle V3 sur 30M steps. La progression ne montre aucun signe de plateau :
+
+<table>
+<thead><tr><th>Métrique</th><th style={{textAlign:'right'}}>3M</th><th style={{textAlign:'right'}}>10M</th><th style={{textAlign:'right'}}>30M</th></tr></thead>
+<tbody>
+<tr><td>Score moyen (100 ep.)</td><td style={{textAlign:'right'}}>9 474</td><td style={{textAlign:'right'}}>15 892</td><td style={{textAlign:'right'}}><strong>27 461</strong></td></tr>
+<tr><td>Tuile max</td><td style={{textAlign:'right'}}>512–709</td><td style={{textAlign:'right'}}>846–1 024</td><td style={{textAlign:'right'}}><strong>2 048–4 096</strong></td></tr>
+<tr><td>Longueur d&apos;épisode</td><td style={{textAlign:'right'}}>~598</td><td style={{textAlign:'right'}}>~923</td><td style={{textAlign:'right'}}><strong>~1 456</strong></td></tr>
+<tr><td>Value loss</td><td style={{textAlign:'right'}}>0.03</td><td style={{textAlign:'right'}}>0.024</td><td style={{textAlign:'right'}}><strong>0.0185</strong></td></tr>
+<tr><td>Explained variance</td><td style={{textAlign:'right'}}>0.86</td><td style={{textAlign:'right'}}>0.87</td><td style={{textAlign:'right'}}><strong>0.9025</strong></td></tr>
+</tbody>
+</table>
+
+Le explained_variance a franchi 0.90, le critique prédit donc les retours avec une précision élevée. L'entropy reste saine à -0.34, loin du collapse. L'approx_kl diminue (0.058 → 0.035), signe d'une politique qui mature sans diverger.
+
+### Évaluation : 5 parties en mode déterministe
+
+<table>
+<thead><tr><th style={{textAlign:'right'}}>Épisode</th><th style={{textAlign:'right'}}>Score</th><th style={{textAlign:'right'}}>Tuile max</th><th style={{textAlign:'right'}}>Reward</th></tr></thead>
+<tbody>
+<tr><td style={{textAlign:'right'}}>1</td><td style={{textAlign:'right'}}>60 496</td><td style={{textAlign:'right'}}><strong>4096</strong></td><td style={{textAlign:'right'}}>31 452</td></tr>
+<tr><td style={{textAlign:'right'}}>2</td><td style={{textAlign:'right'}}>43 348</td><td style={{textAlign:'right'}}>2048</td><td style={{textAlign:'right'}}>24 545</td></tr>
+<tr><td style={{textAlign:'right'}}>3</td><td style={{textAlign:'right'}}>36 272</td><td style={{textAlign:'right'}}>2048</td><td style={{textAlign:'right'}}>20 766</td></tr>
+<tr><td style={{textAlign:'right'}}>4</td><td style={{textAlign:'right'}}>28 892</td><td style={{textAlign:'right'}}>2048</td><td style={{textAlign:'right'}}>16 633</td></tr>
+<tr><td style={{textAlign:'right'}}>5</td><td style={{textAlign:'right'}}>20 092</td><td style={{textAlign:'right'}}>1024</td><td style={{textAlign:'right'}}>12 820</td></tr>
+</tbody>
+</table>
+
+Score moyen : **37 820**. Tuile médiane : **2048**. 3 parties sur 5 atteignent 2048, une atteint 4096. Par rapport à la V1 : **7.8x** sur le score moyen.
+
+## Le takeaway
+
+J'ai passé des semaines à ajuster des hyperparamètres : entropy coefficient, learning rate schedule, architecture du critique, reward shaping, le tout pour des gains marginaux. Puis 4 lignes de VecNormalize ont transformé une value_loss de 2 153 en 0.03 et triplé le score.
+
+Sans TensorBoard, je n'aurais jamais identifié le problème. La value_loss explosive du run B était le seul indice pointant vers un problème de scale des récompenses. Sans l'ablation D vs E, je n'aurais pas su que VecNormalize, et non les ajustements PPO, était le facteur décisif.
+
+Ne tuez pas vos rewards. Normalisez-les.
+
+---
+
+Le code source, le modèle entraîné et les logs TensorBoard sont disponibles sur [GitHub](https://github.com/Corentinjst/2048-RL).

@@ -1,0 +1,161 @@
+---
+title: "Construire un Help Center IA en 3 jours : RAG et leadership en hackathon"
+date: "2025-11-10"
+description: "Comment notre équipe a conçu un pipeline RAG pour transformer un help center universitaire et ce que j'ai appris en menant quatre développeurs sous contrainte de temps."
+tags: ["RAG (Retrieval Augmented Generation)", "Elasticsearch", "Embeddings", "NLP", "FastAPI", "Leadership", "Project managment", "Python"]
+---
+
+Des milliers d'étudiants, ~400 questions dans une base de connaissances, et une recherche manuelle par mots-clés comme seul outil. Le Pôle Léonard de Vinci voulait un agent conversationnel capable de comprendre le contexte d'une question et de produire la meilleure réponse possible, le tout prêt à être branché sur le portail existant. Délai : 3 jours de hackathon.
+
+Notre équipe de quatre a remporté la track Automation du Hackathon ESILV x IBM avec ce projet.
+
+## Le défi
+
+Le Help Center actuel couvre les inscriptions, les problèmes informatiques, les procédures administratives et la vie sur le campus. Le brief demandait un POC capable de :
+
+- Ingérer le jeu de données Q&R existant au format Excel (~400 lignes)
+- Comprendre le contexte derrière la question d'un étudiant
+- Retourner la meilleure réponse possible au format HTML
+- Rediriger vers un formulaire de support lorsqu'aucune réponse n'existe
+- S'améliorer au fil du temps en enregistrant les interactions
+
+Une contrainte a façonné notre architecture dès le départ : le service informatique de l'école utilise **Vue.js** et **MariaDB**. Tout ce que nous construirions devait s'intégrer dans cet environnement technique, sous peine de ne jamais être déployé.
+
+## Architecture : trois services, un pipeline
+
+Nous avons découpé le système en trois services indépendants connectés par des API REST :
+
+1. **Service d'embeddings** (Python/FastAPI, port 8000) : l'intelligence centrale. Génère les embeddings vectoriels, les indexe dans Elasticsearch, gère la recherche sémantique et la synthèse LLM.
+2. **Application utilisateur** (Vue.js + Express.js) : le chatbot côté étudiant. Envoie les requêtes au service d'embeddings, affiche les réponses HTML, collecte les retours.
+3. **Application admin** (Vue.js + Express.js) : gestion de contenu, tableau de bord analytique, suivi des tickets de support.
+
+MariaDB stocke les données relationnelles (questions, feedback, tickets de support). Elasticsearch stocke l'index vectoriel. Les deux applications lisent la même base de données ; le service d'embeddings maintient Elasticsearch synchronisé.
+
+Cette séparation permettait à chaque membre de l'équipe de travailler sur un service de manière indépendante ce qui s'est avéré être crucial vu la contrainte de temps.
+
+## Le pipeline RAG
+
+Le coeur du système est un pipeline en quatre étapes au sein du service FastAPI :
+
+```
+Question utilisateur → Embedding → Recherche cosinus Elasticsearch → Top-K → Synthèse LLM
+```
+
+### Indexation
+
+Lorsqu'un administrateur publie ou met à jour du contenu, l'endpoint `/build_index` lit toutes les questions publiées depuis MariaDB, génère un embedding pour chacune via `text-embedding-3-small` d'OpenAI (1536 dimensions), et indexe le résultat dans Elasticsearch avec un mapping `dense_vector` :
+
+```python
+es.indices.create(
+    index=ES_INDEX,
+    mappings={
+        "properties": {
+            "embedding": {
+                "type": "dense_vector",
+                "dims": 1536,
+                "index": True,
+                "similarity": "cosine"
+            },
+            # question, answer, category, language, schools...
+        }
+    }
+)
+```
+
+~400 questions indexées, chacune transformée en vecteur de 1536 dimensions.
+
+### Recherche sémantique
+
+Quand un étudiant pose une question, l'endpoint `/ask` génère un embedding pour la requête et lance une recherche par similarité cosinus sur l'index :
+
+```python
+results = es.search(
+    index=ES_INDEX,
+    size=top_k,
+    query={
+        "script_score": {
+            "query": {"match_all": {}},
+            "script": {
+                "source": "cosineSimilarity(params.query_vector, 'embedding') + 1.0",
+                "params": {"query_vector": query_embedding}
+            }
+        }
+    }
+)
+```
+
+La première chose que nous avons essayée était une recherche full-text classique dans Elasticsearch. Les résultats étaient corrects quand la question de l'étudiant reprenait les mêmes mots que la base, mais dès que la formulation changeait comme "je n'arrive pas à me connecter au wifi" vs "problème de connexion réseau", le moteur ne trouvait rien de pertinent. Nous avions besoin d'une approche sémantique.
+
+Nous sommes passés aux embeddings vectoriels avec similarité cosinus. La différence a été immédiate : des questions formulées différemment mais portant sur le même sujet remontaient enfin les bons résultats.
+
+### Synthèse LLM
+
+Les meilleurs résultats sont transmis à GPT-4o-mini avec un prompt système soigneusement conçu. Le modèle doit répondre **strictement à partir des extraits fournis**, citer ses sources et retourner du JSON structuré avec un champ `answer_html`. On force la sortie JSON avec `response_format={"type": "json_object"}`.
+
+Le schéma de réponse est standardisé :
+
+```json
+{
+  "language": "fr",
+  "answered": true,
+  "answer_html": "<p><strong>Réponse :</strong> ...</p>",
+  "used_source_ids": ["doc_017", "doc_042"],
+  "citations": [{"id": "doc_017", "title": "...", "url": "..."}],
+  "redirect": {"needed": false, "label": null, "url": null}
+}
+```
+
+Notre première version du prompt système laissait le LLM reformuler librement. Le problème : il inventait des détails qui n'existaient pas dans les extraits. Nous avons resserré le prompt pour interdire toute information hors extraits et ajouté un mécanisme de redirection. Quand le LLM ne peut pas répondre, il renvoie `answered: false` et le frontend affiche un lien vers le formulaire de support. C'était une exigence de l'école : aucune réponse hallucinée, jamais.
+
+### Synchronisation
+
+L'endpoint `/sync` compare l'état de MariaDB à celui d'Elasticsearch, supprime les documents retirés et indexe les nouveaux. Cela maintient l'index de recherche à jour sans reconstruction complète.
+
+## La boucle de feedback
+
+Chaque réponse du chatbot inclut un bouton pouce haut/pouce bas. Ce feedback est enregistré avec la requête originale, l'identifiant de la question matchée et le score de similarité.
+
+Le tableau de bord admin expose ces données sous forme d'analytique : quelles questions sont les plus posées, quelles réponses ont un faible taux de satisfaction, où se trouvent les lacunes dans la base de connaissances.
+
+C'était l'aspect "auto-apprentissage" demandé par le brief. Pas du retraining automatisé, mais un pipeline de données concret qui aide les administrateurs à identifier quel contenu ajouter ou améliorer.
+
+## Mener une équipe de quatre en 72 heures
+
+Première expérience en tant que team leader sur un projet technique sous pression réelle. Quatre personnes, trois jours, une démo fonctionnelle à livrer.
+
+**Découper le travail selon les frontières des services.** L'architecture à trois services n'était pas qu'un choix technique, c'était une décision de gestion de projet. Chaque service avait son propre répertoire, son propre serveur, son propre port. Cela nous permettait de travailler en parallèle sans marcher sur le code des autres.
+
+J'ai assigné les responsabilités tôt : une personne sur le pipeline d'embeddings, une sur le frontend utilisateur, une sur l'application admin. Je naviguais entre les trois pour gérer l'intégration, la conception du schéma de base de données et la présentation.
+
+**Garder le scope sous contrôle.** Le brief contenait beaucoup d'idées : auto-apprentissage, support multilingue, interface mobile. Nous avons fait des choix délibérés sur ce qu'il fallait construire et ce qu'il fallait couper. La priorité était un pipeline RAG fonctionnel avec des réponses correctes. Le polish de l'interface venait en second.
+
+Des fonctionnalités comme le retraining automatisé ont été réduites à un système de collecte de feedback qui pourrait le supporter plus tard. Chaque fonctionnalité livrée marchait de bout en bout.
+
+**La communication comme goulet d'étranglement.** Dans un sprint de 72 heures, le plus grand risque n'est pas la difficulté technique, c'est le désalignement. Quelqu'un construit un endpoint qui retourne des données dans un format que personne n'attend. Quelqu'un modifie une table de base de données sans prévenir la personne qui l'interroge.
+
+J'ai appris qu'en tant que team leader, ma contribution la plus précieuse n'était pas d'écrire le plus de code, mais de m'assurer que tout le monde savait ce que les autres faisaient. Des points rapides au début et à la fin de chaque session de travail. Un document partagé avec l'état actuel de chaque composant. Signaler les blocages tôt plutôt que d'attendre qu'ils se propagent.
+
+## Résumé de la stack
+
+<table>
+  <thead>
+    <tr><th>Couche</th><th>Technologie</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Frontend utilisateur</td><td>Vue.js 3, Vite</td></tr>
+    <tr><td>Frontend admin</td><td>Vue.js 3, Vite, Chart.js</td></tr>
+    <tr><td>Backend utilisateur</td><td>Express.js</td></tr>
+    <tr><td>Backend admin</td><td>Express.js</td></tr>
+    <tr><td>Service RAG</td><td>FastAPI, OpenAI API</td></tr>
+    <tr><td>Recherche vectorielle</td><td>Elasticsearch 8.x</td></tr>
+    <tr><td>Base de données</td><td>MariaDB</td></tr>
+    <tr><td>Embeddings</td><td>text-embedding-3-small (1536d)</td></tr>
+    <tr><td>LLM</td><td>GPT-4o-mini</td></tr>
+  </tbody>
+</table>
+
+---
+
+
+Construit en 3 jours par Corentin, Maxime Langelier, Vianney Le Bourhis et Noé Le Yhuelic lors du Hackathon ESILV x IBM.
+
