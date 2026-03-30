@@ -11,16 +11,15 @@ const experiences: Experience[] = [
     role:
       'Au sein de l\'équipe Data du CCF, j\'interviens sur deux axes principaux : l\'évaluation de l\'impact réel des campagnes CRM sur le comportement client, et la détection de flux financiers vers des plateformes de cryptomonnaies à des fins de conformité réglementaire (KYC).',
     responsibilities: [
-      'Développement d\'un dashboard Power BI analysant le comportement client dans les 2 mois post-campagne (souscriptions, flux financiers entrants/sortants)',
-      'Conception mensuelle de groupes de contrôle artificiels par Propensity Score Matching (PSM) pour isoler l\'effet causal des communications CRM',
-      'Mesure des revenus incrémentaux réels générés, en distinguant l\'effet campagne des tendances naturelles de comportement client',
+      'Conception d\'une méthodologie d\'évaluation causale des campagnes CRM, rendue nécessaire par l\'absence de groupes témoins dans les ciblages de l\'équipe',
+      'Construction mensuelle de groupes de contrôle artificiels par Propensity Score Matching (PSM) pour reconstituer a posteriori un contrefactuel et isoler l\'effet propre des campagnes',
+      'Développement d\'un dashboard Power BI de suivi du comportement client post-campagne (souscriptions, flux financiers entrants/sortants sur 2 mois)',
       'Développement d\'un pipeline de classification NLP sur les libellés de transactions bancaires pour identifier les flux vers des plateformes de cryptomonnaies',
       'Contribution aux enjeux de conformité réglementaire et de connaissance client (KYC)',
     ],
     accomplishments: [
-      'Mise en place d\'une méthodologie causale robuste (PSM) permettant d\'attribuer précisément les revenus générés aux campagnes CRM',
+      'Première mesure fiable de l\'effet incrémental des campagnes CRM au sein du CCF, permettant de distinguer les revenus réellement générés des tendances naturelles de comportement client',
       'Déploiement d\'un modèle NLP de classification de transactions bancaires opérationnel en production',
-      'Automatisation du reporting CRM via Power BI, offrant une visibilité mensuelle sur l\'impact des campagnes',
     ],
     skills: [
       'Python', 'SQL', 'NLP', 'Scikit-learn', 'Propensity Score Matching', 'Power BI', 'Git',
@@ -33,7 +32,7 @@ const experiences: Experience[] = [
     preview:
       'Conception et déploiement d\'un dashboard Power BI de monitoring opérationnel des campagnes CRM, actualisé quotidiennement.',
     role:
-      'Première mission au sein de CCF Banque, intégré à l\'équipe CRM. J\'ai piloté la construction d\'un outil de suivi de la performance des campagnes multicanales, devenu référence interne pour le pilotage quotidien des équipes CRM.',
+      'Première mission au sein de CCF Banque, intégré à l\'équipe CRM. J\'ai construit un outil de suivi de la performance des campagnes multicanales, devenu référence interne pour le pilotage quotidien des équipes CRM.',
     responsibilities: [
       'Conception et déploiement d\'un dashboard Power BI de monitoring opérationnel des campagnes CRM, actualisé quotidiennement',
       'Suivi de bout en bout de la performance des envois sur tous les canaux : taux d\'ouverture, taux de clic sur pièces jointes, désabonnements',

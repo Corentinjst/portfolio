@@ -48,7 +48,8 @@ export default function Hero() {
                 Data Scientist avec deux ans d&apos;expérience en alternance dans le secteur bancaire, j&apos;ai eu la
                 chance de travailler sur des problématiques où les données ont un impact business direct :
                 évaluation de l&apos;efficacité de campagnes commerciales, détection de transactions vers
-                des plateformes crypto, ou encore automatisation de reportings risque crédit et fraude.
+                des plateformes crypto, ou encore optimisation et automatisation de reportings risque
+                crédit et fraude.
               </p>
               <p>
                 Ce qui me motive, c&apos;est autant la profondeur technique d&apos;un modèle bien conçu
