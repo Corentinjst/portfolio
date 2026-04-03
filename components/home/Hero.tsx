@@ -21,15 +21,6 @@ export default function Hero() {
 
           {/* Left — text content */}
           <div className="flex-1 min-w-0">
-            {/* Greeting badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-accent/30 bg-accent/5 text-accent text-sm mb-6">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
-              </span>
-              Disponible pour un poste de Data Scientist
-            </div>
-
             {/* Main heading */}
             <h1 className="font-heading font-bold text-5xl sm:text-6xl lg:text-7xl text-slate-100 leading-tight mb-4">
               Corentin Juste
@@ -99,8 +90,8 @@ export default function Hero() {
                 </svg>
                 Contact
               </a>
-              {/*<a
-                href="/cv.pdf"
+              <a
+                href="/CV_CorentinJUSTE.pdf"
                 download
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-dark text-white font-semibold rounded-lg transition-colors text-sm"
               >
@@ -108,7 +99,7 @@ export default function Hero() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                 </svg>
                 CV
-              </a>*/}
+              </a>
             </div>
           </div>
 
