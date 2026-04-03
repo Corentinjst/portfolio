@@ -1,45 +1,56 @@
 'use client'
 
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 
 const navLinks = [
-  { href: '#top', label: 'Accueil' },
-  { href: '#parcours', label: 'Parcours' },
-  { href: '#projets', label: 'Projets' },
-  { href: '#blog', label: 'Blog' },
+  { href: '/', label: 'Accueil' },
+  { href: '/#parcours', label: 'Parcours' },
+  { href: '/#blog', label: 'Blog' },
+  { href: '/#projets', label: 'Projets' },
 ]
-
-function scrollToTop(e: React.MouseEvent) {
-  e.preventDefault()
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const isHome = pathname === '/'
+
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    if (!isHome) return // let normal navigation happen
+
+    e.preventDefault()
+    if (href === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      const id = href.replace('/#', '')
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-surface-border">
       <nav className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a
-          href="#"
-          onClick={scrollToTop}
+        <Link
+          href="/"
+          onClick={(e) => handleClick(e, '/')}
           className="font-heading font-bold text-lg text-slate-100 hover:text-accent transition-colors"
         >
           Corentin<span className="text-accent">.</span>
-        </a>
+        </Link>
 
         {/* Desktop nav */}
         <ul className="hidden sm:flex items-center gap-8">
           {navLinks.map((link) => (
             <li key={link.href}>
-              <a
+              <Link
                 href={link.href}
-                onClick={link.href === '#top' ? scrollToTop : undefined}
+                onClick={(e) => handleClick(e, link.href)}
                 className="text-sm font-medium transition-colors hover:text-accent text-slate-400"
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -81,16 +92,16 @@ export default function Navbar() {
           <ul className="flex flex-col px-4 py-3 gap-4">
             {navLinks.map((link) => (
               <li key={link.href}>
-                <a
+                <Link
                   href={link.href}
                   onClick={(e) => {
                     setMenuOpen(false)
-                    if (link.href === '#top') scrollToTop(e)
+                    handleClick(e, link.href)
                   }}
                   className="block text-sm font-medium transition-colors hover:text-accent text-slate-300"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

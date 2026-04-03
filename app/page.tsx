@@ -3,7 +3,7 @@ import Hero from '@/components/home/Hero'
 import ParcoursSection from '@/components/home/ParcoursSection'
 import ProjectsSection from '@/components/home/ProjectsSection'
 import BlogSection from '@/components/home/BlogSection'
-import { getAllProjects, getProjectBySlug, getAllBlogPosts, getBlogPostBySlug } from '@/lib/mdx'
+import { getAllProjects, getProjectBySlug, getAllBlogPosts } from '@/lib/mdx'
 
 export const metadata: Metadata = {
   title: 'Corentin Juste - Data Scientist',
@@ -21,19 +21,13 @@ export default async function HomePage() {
   )
 
   const allPosts = await getAllBlogPosts()
-  const postsWithContent = await Promise.all(
-    allPosts.map(async (p) => {
-      const { meta, mdxContent } = await getBlogPostBySlug(p.slug)
-      return { meta, mdxContent }
-    })
-  )
 
   return (
     <>
       <Hero />
       <ParcoursSection />
+      <BlogSection posts={allPosts} />
       <ProjectsSection projects={projectsWithContent} />
-      <BlogSection posts={postsWithContent} />
     </>
   )
 }

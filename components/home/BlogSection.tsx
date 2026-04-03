@@ -1,22 +1,11 @@
-'use client'
-
-import { useState } from 'react'
 import BlogCard from '@/components/blog/BlogCard'
-import BlogModal from '@/components/modals/BlogModal'
 import type { BlogPost } from '@/types'
 
 interface BlogSectionProps {
-  posts: Array<{
-    meta: BlogPost
-    mdxContent: React.ReactNode
-  }>
+  posts: BlogPost[]
 }
 
 export default function BlogSection({ posts }: BlogSectionProps) {
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
-
-  const selected = posts.find((p) => p.meta.slug === selectedSlug)
-
   return (
     <section id="blog" className="scroll-mt-20 max-w-6xl mx-auto px-4 sm:px-6 py-20 border-t border-surface-border">
       {/* Header */}
@@ -34,24 +23,13 @@ export default function BlogSection({ posts }: BlogSectionProps) {
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {posts.map(({ meta }) => (
+        {posts.map((post) => (
           <BlogCard
-            key={meta.slug}
-            post={meta}
-            onClick={() => setSelectedSlug(meta.slug)}
+            key={post.slug}
+            post={post}
           />
         ))}
       </div>
-
-      {/* Modal */}
-      {selected && (
-        <BlogModal
-          post={selected.meta}
-          mdxContent={selected.mdxContent}
-          open={true}
-          onClose={() => setSelectedSlug(null)}
-        />
-      )}
     </section>
   )
 }
