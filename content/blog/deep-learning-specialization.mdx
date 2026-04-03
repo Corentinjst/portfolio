@@ -1,0 +1,60 @@
+---
+title: "Deep Learning Specialization : ce que 5 cours d'Andrew Ng m'ont apporté"
+date: "2026-04-03"
+description: "Connaître la backpropagation et savoir quand l'appliquer sur un vrai projet, ce n'est pas la même chose. Comment la Deep Learning Specialization d'Andrew Ng a comblé l'écart entre théorie académique et pratique du deep learning."
+tags: ["Deep Learning", "Réseaux de neurones", "Optimisation", "CNN", "RNN"]
+---
+
+# Deep Learning Specialization : ce que 5 cours d'Andrew Ng m'ont apporté au-delà de l'école d'ingénieur
+
+Connaître la backpropagation et savoir quand l'appliquer sur un vrai projet, ce n'est pas la même chose. En M2 Data & IA à l'ESILV, j'avais vu les réseaux de neurones, les CNN, les fonctions de coût. Je savais *ce que c'était*. Ce que je ne savais pas, c'est *comment diagnostiquer un modèle qui stagne* ou *pourquoi choisir Adam plutôt que SGD sur un problème donné*. La <a href="https://www.coursera.org/specializations/deep-learning" target="_blank" rel="noopener noreferrer">Deep Learning Specialization</a> d'Andrew Ng a comblé cet écart.
+
+> 🔗 <a href="https://coursera.org/share/a3ff8baeb6efb06b0507307d6935c45e" target="_blank" rel="noopener noreferrer">Voir ma certification</a>
+
+## Ce qu'Andrew Ng explique autrement
+
+La spécialisation couvre cinq cours, des réseaux de neurones de base jusqu'aux Transformers. Sur le papier, je connaissais déjà une bonne partie de ces notions. La différence : Andrew Ng ancre chaque concept dans une **intuition** avant de le formaliser. Là où un cours académique enchaîne parfois les formules, cette spécialisation fait le chemin inverse : on comprend d'abord *pourquoi* un mécanisme fonctionne, puis on plonge dans le *comment*.
+
+Concrètement, voici ce que ça change :
+
+**Optimisation** : En cours, Adam est un hyperparamètre parmi d'autres. Dans la spécialisation, c'est un choix de design qui dépend du problème. Chaque optimiseur a un comportement, des forces et des limites et le choix dépend de la dynamique d'entraînement, pas d'une valeur par défaut.
+
+**Régularisation** : Dropout, batch normalization, early stopping : je les utilisais déjà. La spécialisation m'a donné une grille de lecture pour savoir *laquelle appliquer en premier* selon le diagnostic du modèle. Avant d'ajouter de la régularisation, il faut comprendre si le problème vient du biais, de la variance, ou d'autre chose et la réponse n'est pas toujours un dropout.
+
+**CNN** : Des architectures classiques (LeNet, VGG) jusqu'à ResNet et Inception, le cours détaille les choix de design derrière chaque architecture. Pourquoi des skip connections dans ResNet ? Pourquoi des kernels de tailles différentes dans Inception ? Comprendre ces décisions, c'est ce qui permet ensuite de concevoir une architecture adaptée à son propre problème plutôt que d'empiler des couches au hasard.
+
+**Modèles de séquence** : RNN, GRU, LSTM, puis les mécanismes d'attention et l'architecture Transformer. Comprendre l'évolution de ces architectures, pourquoi on est passé des RNN aux Transformers, donne une perspective qui éclaire l'état actuel du domaine.
+
+## La vraie découverte : structurer un projet ML
+
+Si les concepts techniques ont consolidé mes acquis, c'est le cours 3 : *Structuring Machine Learning Projects*, qui m'a le plus apporté en termes de nouveauté.
+
+Avant cette spécialisation, je n'avais jamais abordé de manière aussi concrète la méthodologie de gestion d'un projet de ML/DL. Andrew Ng y partage des réflexes issus de son expérience industrielle : l'analyse d'erreurs, le choix entre biais et variance pour orienter ses efforts, la définition de métriques d'évaluation pertinentes, ou encore le concept de "human-level performance" comme baseline de référence.
+
+Ces enseignements ont changé ma façon d'aborder un projet. Quelques principes qui me guident désormais au quotidien :
+
+- **Diagnostiquer avant d'agir** : face à un modèle sous-performant, identifier si le problème vient du biais ou de la variance avant de toucher à quoi que ce soit.
+- **Itérer vite** : commencer par un modèle simple, mesurer, puis améliorer de manière ciblée plutôt que de chercher l'architecture parfaite dès le départ.
+- **Définir une métrique unique d'évaluation** : pour garder un cap clair et éviter de se disperser entre plusieurs objectifs contradictoires.
+
+## Application concrète : du cours au projet 2048
+
+L'exemple le plus direct : mon agent de [Deep Reinforcement Learning sur le 2048](https://github.com/Corentinjst/2048-RL). Après 10M steps d'entraînement, le score moyen plafonnait à ~3 500 et la tuile max restait bloquée à 512. Le réflexe avant la spécialisation aurait été de changer l'architecture ou d'augmenter le nombre de steps.
+
+Le diagnostic biais/variance appris dans le cours 3 m'a orienté ailleurs. TensorBoard montrait une **value_loss explosive à 2 153** : le critique n'arrivait pas à prédire les retours futurs. Le problème ne venait pas du modèle, mais de l'échelle des récompenses. J'ai ajouté **VecNormalize** (4 lignes de code) pour normaliser les rewards à moyenne nulle et variance unitaire. Résultat : value_loss ramenée à 0.03, score moyen passé de 3 500 à **27 461**, et la tuile **4096** atteinte.
+
+Sans la méthodologie "diagnostiquer avant d'agir" de la spécialisation, j'aurais perdu des semaines à modifier les mauvais paramètres.
+
+En alternance, cette rigueur prend encore plus de sens. Quand les modèles sont destinés à être déployés en production et influencent des décisions business, savoir diagnostiquer un pipeline ML avant de le modifier n'est pas un luxe, c'est ce qui sépare un ajustement pertinent d'un tâtonnement coûteux.
+
+## Ce que la formation ne dit pas : rendre le ML compréhensible
+
+Malgré tous les enseignements précieux de cette spécialisation, il y a un aspect qu'elle n'aborde pas et que j'ai découvert sur le terrain, en alternance : l'importance de rendre l'ensemble de la démarche ML lisible pour des interlocuteurs non techniques.
+
+Un modèle peut avoir d'excellentes performances, un pipeline irréprochable et des métriques au vert, si les utilisateurs finaux ne comprennent pas la logique qui sous-tend les résultats, ils ne leur feront pas confiance. Et un modèle auquel personne ne fait confiance ne sert, dans les faits, à rien.
+
+Ce que j'ai appris en entreprise, c'est que l'histoire que raconte tout le processus compte presque autant que la performance du modèle elle-même. De la sélection et du traitement des données jusqu'à la prédiction et aux KPI qui en découlent, chaque étape doit pouvoir être expliquée clairement à quelqu'un qui ne connaît ni Python ni la descente de gradient. Si un décideur ne comprend pas pourquoi le modèle recommande telle action, il ne l'appliquera pas et tout le travail technique en amont perd son utilité.
+
+C'est un angle mort fréquent dans les formations techniques, y compris celle-ci. Un modèle bien construit mais incompréhensible pour ses utilisateurs ne sert à rien. Un modèle bien expliqué mais mal diagnostiqué ne tient pas en production. La spécialisation m'a appris à construire. Le terrain m'a appris à convaincre.
+
+Pour un étudiant ou un ingénieur qui a déjà les bases : cette spécialisation n'apprend pas le deep learning, elle apprend à s'en servir.
