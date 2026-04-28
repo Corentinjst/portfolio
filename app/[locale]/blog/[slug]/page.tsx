@@ -1,41 +1,50 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { getAllBlogPosts, getBlogPostBySlug } from '@/lib/mdx'
 import { notFound } from 'next/navigation'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { Link } from '@/navigation'
+import { getAllBlogPosts, getBlogPostBySlug, type ContentLocale } from '@/lib/mdx'
+import { locales } from '@/i18n'
 
 interface Props {
-  params: Promise<{ slug: string }>
+  params: { locale: string; slug: string }
 }
 
 export async function generateStaticParams() {
   const posts = await getAllBlogPosts()
-  return posts.map((post) => ({ slug: post.slug }))
+  return locales.flatMap((locale) =>
+    posts.map((post) => ({ locale, slug: post.slug })),
+  )
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+  const { locale, slug } = params
   try {
-    const { meta } = await getBlogPostBySlug(slug)
+    const { meta } = await getBlogPostBySlug(slug, locale as ContentLocale)
     return {
       title: `${meta.title} — Corentin Juste`,
       description: meta.description,
     }
   } catch {
-    return { title: 'Article introuvable' }
+    const t = await getTranslations({ locale, namespace: 'BlogPost' })
+    return { title: t('notFound') }
   }
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  const { slug } = await params
+  const { locale, slug } = params
+  setRequestLocale(locale)
+  const t = await getTranslations({ locale, namespace: 'BlogPost' })
 
   let meta, mdxContent
   try {
-    const result = await getBlogPostBySlug(slug)
+    const result = await getBlogPostBySlug(slug, locale as ContentLocale)
     meta = result.meta
     mdxContent = result.mdxContent
   } catch {
     notFound()
   }
+
+  const dateFormatLocale = locale === 'en' ? 'en-US' : 'fr-FR'
 
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
@@ -44,7 +53,7 @@ export default async function BlogPostPage({ params }: Props) {
         href="/#blog"
         className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-accent transition-colors mb-10"
       >
-        ← Retour aux articles
+        {t('back')}
       </Link>
 
       {/* Meta info */}
@@ -53,7 +62,7 @@ export default async function BlogPostPage({ params }: Props) {
           dateTime={meta.date}
           className="text-sm text-slate-500"
         >
-          {new Date(meta.date).toLocaleDateString('fr-FR', {
+          {new Date(meta.date).toLocaleDateString(dateFormatLocale, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -61,7 +70,7 @@ export default async function BlogPostPage({ params }: Props) {
         </time>
         <span className="text-slate-600">·</span>
         <span className="text-sm text-slate-500">
-          {meta.readingTime} min de lecture
+          {t('readingTime', { minutes: meta.readingTime })}
         </span>
       </div>
 
