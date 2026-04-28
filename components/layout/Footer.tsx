@@ -1,13 +1,15 @@
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/navigation'
 
 export default function Footer() {
+  const t = useTranslations('Footer')
   const currentYear = new Date().getFullYear()
 
   return (
     <footer className="border-t border-surface-border bg-surface mt-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-slate-500">
-          © {currentYear} Corentin Juste - Data Scientist
+          {t('copyright', { year: currentYear })}
         </p>
 
         <div className="flex items-center gap-6">
@@ -16,7 +18,7 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             className="text-slate-400 hover:text-accent transition-colors text-sm"
-            aria-label="GitHub"
+            aria-label={t('githubAriaLabel')}
           >
             <svg
               className="h-5 w-5"
@@ -37,7 +39,7 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             className="text-slate-400 hover:text-accent transition-colors text-sm"
-            aria-label="LinkedIn"
+            aria-label={t('linkedinAriaLabel')}
           >
             <svg
               className="h-5 w-5"
@@ -52,7 +54,7 @@ export default function Footer() {
           <Link
             href="mailto:corentinjuste92@gmail.com"
             className="text-slate-400 hover:text-accent transition-colors text-sm"
-            aria-label="Email"
+            aria-label={t('emailAriaLabel')}
           >
             <svg
               className="h-5 w-5"

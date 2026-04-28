@@ -1,19 +1,22 @@
-import Link from 'next/link'
+import { useLocale, useTranslations } from 'next-intl'
+import { Link } from '@/navigation'
 import type { BlogPost } from '@/types'
 
 interface BlogCardProps {
   post: BlogPost
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('fr-FR', {
+export default function BlogCard({ post }: BlogCardProps) {
+  const t = useTranslations('BlogCard')
+  const locale = useLocale()
+  const dateFormatLocale = locale === 'en' ? 'en-US' : 'fr-FR'
+
+  const formattedDate = new Date(post.date).toLocaleDateString(dateFormatLocale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   })
-}
 
-export default function BlogCard({ post }: BlogCardProps) {
   return (
     <Link href={`/blog/${post.slug}`} className="block h-full">
       <article className="group flex flex-col h-full bg-surface-elevated border border-surface-border rounded-xl p-5 hover:border-accent hover:shadow-lg hover:shadow-accent/10 transition-all duration-300 cursor-pointer">
@@ -23,11 +26,11 @@ export default function BlogCard({ post }: BlogCardProps) {
             dateTime={post.date}
             className="text-xs text-slate-500"
           >
-            {formatDate(post.date)}
+            {formattedDate}
           </time>
           <span className="text-slate-600 text-xs">·</span>
           <span className="text-xs text-slate-500">
-            {post.readingTime} min de lecture
+            {t('readingTime', { minutes: post.readingTime })}
           </span>
         </div>
 
@@ -55,7 +58,7 @@ export default function BlogCard({ post }: BlogCardProps) {
 
         {/* CTA */}
         <span className="text-xs text-accent group-hover:text-accent-light transition-colors font-medium self-start">
-          Lire l&apos;article →
+          {t('readArticle')}
         </span>
       </article>
     </Link>

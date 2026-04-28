@@ -1,7 +1,8 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/navigation'
 import type { Project } from '@/types'
 
 interface ProjectCardProps {
@@ -10,6 +11,7 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project, onClick }: ProjectCardProps) {
+  const t = useTranslations('ProjectCard')
   const cardContent = (
     <>
       {/* Cover image */}
@@ -63,7 +65,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="relative z-10 flex items-center gap-1.5 text-xs text-slate-400 hover:text-accent transition-colors"
-              aria-label="Voir sur GitHub"
+              aria-label={t('githubAriaLabel')}
               onClick={(e) => e.stopPropagation()}
             >
               <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -73,7 +75,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
                   clipRule="evenodd"
                 />
               </svg>
-              GitHub
+              {t('viewGithub')}
             </a>
           )}
           {project.demo_url && (
@@ -82,7 +84,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="relative z-10 flex items-center gap-1.5 text-xs text-slate-400 hover:text-accent transition-colors"
-              aria-label="Voir la démo"
+              aria-label={t('demoAriaLabel')}
               onClick={(e) => e.stopPropagation()}
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,11 +95,11 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
                   d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
                 />
               </svg>
-              Démo
+              {t('viewDemo')}
             </a>
           )}
           <span className="ml-auto text-xs text-accent group-hover:text-accent-light transition-colors font-medium">
-            Voir le détail →
+            {t('viewDetails')}
           </span>
         </div>
       </div>

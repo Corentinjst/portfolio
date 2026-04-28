@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import ProjectCard from '@/components/projects/ProjectCard'
 import ProjectModal from '@/components/modals/ProjectModal'
 import type { Project } from '@/types'
@@ -13,6 +14,7 @@ interface ProjectsSectionProps {
 }
 
 export default function ProjectsSection({ projects }: ProjectsSectionProps) {
+  const t = useTranslations('ProjectsSection')
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
 
   const selected = projects.find((p) => p.meta.slug === selectedSlug)
@@ -22,13 +24,13 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
       {/* Header */}
       <div className="mb-10">
         <p className="text-accent text-sm font-medium uppercase tracking-widest mb-2">
-          Portfolio
+          {t('sectionLabel')}
         </p>
         <h2 className="font-heading font-bold text-3xl sm:text-4xl text-slate-100 mb-4">
-          Mes projets
+          {t('sectionTitle')}
         </h2>
         <p className="text-slate-400 text-lg max-w-2xl">
-          Des problèmes réels, des données réelles, des résultats mesurables.
+          {t('sectionDescription')}
         </p>
       </div>
 

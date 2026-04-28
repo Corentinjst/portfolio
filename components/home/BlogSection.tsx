@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import BlogCard from '@/components/blog/BlogCard'
 import type { BlogPost } from '@/types'
 
@@ -6,18 +7,20 @@ interface BlogSectionProps {
 }
 
 export default function BlogSection({ posts }: BlogSectionProps) {
+  const t = useTranslations('BlogSection')
+
   return (
     <section id="blog" className="scroll-mt-20 max-w-6xl mx-auto px-4 sm:px-6 py-20 border-t border-surface-border">
       {/* Header */}
       <div className="mb-10">
         <p className="text-accent text-sm font-medium uppercase tracking-widest mb-2">
-          Blog
+          {t('sectionLabel')}
         </p>
         <h2 className="font-heading font-bold text-3xl sm:text-4xl text-slate-100 mb-4">
-          Articles
+          {t('sectionTitle')}
         </h2>
         <p className="text-slate-400 text-lg max-w-2xl">
-          Retours d&apos;expérience, tutoriels et réflexions sur la Data Science en production.
+          {t('sectionDescription')}
         </p>
       </div>
 

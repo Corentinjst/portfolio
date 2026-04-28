@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 export interface Experience {
   period: string
@@ -20,6 +21,7 @@ interface ExperienceItemProps {
 }
 
 export default function ExperienceItem({ experience, isLast = false }: ExperienceItemProps) {
+  const t = useTranslations('ExperienceItem')
   const [open, setOpen] = useState(false)
 
   return (
@@ -33,7 +35,7 @@ export default function ExperienceItem({ experience, isLast = false }: Experienc
               ? 'bg-surface-border hover:bg-slate-400'
               : 'bg-accent hover:bg-accent-light'
           }`}
-          aria-label={open ? 'Réduire' : 'Développer'}
+          aria-label={open ? t('collapse') : t('expand')}
         />
         {!isLast && <div className="w-px flex-1 bg-surface-border mt-2" />}
       </div>
@@ -76,7 +78,7 @@ export default function ExperienceItem({ experience, isLast = false }: Experienc
             {/* Aperçu du rôle */}
             <div>
               <h4 className="text-xs font-semibold text-accent uppercase tracking-widest mb-2">
-                Aperçu du rôle
+                {t('roleOverview')}
               </h4>
               <p className="text-base text-slate-300 leading-relaxed">{experience.role}</p>
             </div>
@@ -85,7 +87,7 @@ export default function ExperienceItem({ experience, isLast = false }: Experienc
             {experience.responsibilities.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold text-accent uppercase tracking-widest mb-2">
-                  Principales responsabilités
+                  {t('responsibilities')}
                 </h4>
                 <ul className="space-y-1.5">
                   {experience.responsibilities.map((item, i) => (
@@ -102,7 +104,7 @@ export default function ExperienceItem({ experience, isLast = false }: Experienc
             {experience.accomplishments.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold text-accent uppercase tracking-widest mb-2">
-                  Accomplissements
+                  {t('accomplishments')}
                 </h4>
                 <ul className="space-y-1.5">
                   {experience.accomplishments.map((item, i) => (
@@ -119,7 +121,7 @@ export default function ExperienceItem({ experience, isLast = false }: Experienc
             {experience.skills.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold text-accent uppercase tracking-widest mb-2">
-                  Technologies & compétences
+                  {t('skills')}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {experience.skills.map((skill) => (
