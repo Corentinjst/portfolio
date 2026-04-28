@@ -1,0 +1,85 @@
+---
+title: "2048 - Reinforcement Learning"
+date: "2026-03-02"
+description: "Deep reinforcement learning agent playing the 2048 game using MaskablePPO, a custom CNN and reward shaping"
+tags: ["Python", "Reinforcement Learning", "PyTorch", "Stable-Baselines3", "Gymnasium", "TensorBoard"]
+github_url: "https://github.com/Corentinjst/2048-RL"
+cover_image: "/images/projects/2048-rl.png.avif"
+featured: true
+---
+
+## Context
+
+Personal project aimed at training a **reinforcement learning** agent to play the game
+**2048**. The goal: start from scratch and reach the 2048 tile (and beyond) autonomously,
+by iterating on the model architecture, reward shaping and hyperparameters.
+
+## Problem
+
+2048 is a perfect information game with a very large state space (~3.5 × 10³⁰
+possible configurations). The agent must learn non-trivial strategies: keeping
+tiles ordered, maintaining an open board and planning chain merges, solely
+from gameplay experience.
+
+## Solution
+
+Implementation of a complete training pipeline based on **MaskablePPO**
+(Proximal Policy Optimization with invalid action masking):
+
+- **Gymnasium environment**: the game board is encapsulated in an environment
+  compatible with the standard RL ecosystem, with chained wrappers for preprocessing,
+  reward shaping and action masking.
+- **One-hot encoding**: each cell of the board is transformed into its power of 2 then
+  one-hot encoded over 16 channels, producing a `(16, 4, 4)` tensor suited for
+  convolutional processing.
+- **Custom CNN**: a feature extractor with 2 convolutional layers captures the spatial
+  patterns of the board (alignments, tile clusters), followed by separate heads for
+  the actor and the critic.
+- **Reward shaping**: composite reward integrating merges (superlinear),
+  empty cells, board monotonicity and a survival bonus.
+- **VecNormalize**: reward normalization to zero mean and unit variance,
+  reducing value_loss by a factor of 68,000× and unlocking learning.
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Environment</td><td>Gymnasium, NumPy</td></tr>
+    <tr><td>RL Wrappers</td><td>RewardShaping, Preprocessing (one-hot), ActionMasking</td></tr>
+    <tr><td>Model</td><td>MaskablePPO (sb3-contrib), PyTorch</td></tr>
+    <tr><td>Network</td><td>CNN 2×Conv2d(128) + actor/critic MLP</td></tr>
+    <tr><td>Monitoring</td><td>TensorBoard, Pygame (live visualization)</td></tr>
+    <tr><td>Tests</td><td>pytest (117 unit tests)</td></tr>
+  </tbody>
+</table>
+
+## Iterative Approach
+
+Three configurations were developed and compared via 3M step runs:
+
+- **V1** - Baseline PPO with linear reward: plateauing at 256-512, unstable value_loss.
+- **V2** - Superlinear reward `log2(score)²`, LR schedule, wider critic: still
+  stuck at 512 due to explosive value_loss (~2,153).
+- **V3** - Addition of **VecNormalize** on rewards, reduction of n_epochs (10→4),
+  increase of n_steps (2048→4096): value_loss brought down to 0.03, stable learning.
+
+## Results
+
+<table>
+  <thead>
+    <tr><th>Metric</th><th>V2 (3M steps)</th><th>V3 (3M steps)</th><th>V3 (30M steps)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Average score (100 ep.)</td><td>3,735</td><td>9,474</td><td><strong>27,461</strong></td></tr>
+    <tr><td>Max tile</td><td>256-512</td><td>512-709</td><td><strong>2,048 - 4,096</strong></td></tr>
+    <tr><td>Value loss</td><td>2,153</td><td>0.03</td><td><strong>0.0185</strong></td></tr>
+    <tr><td>Explained variance</td><td>0.68</td><td>0.86</td><td><strong>0.9025</strong></td></tr>
+  </tbody>
+</table>
+
+After 30M training steps, the agent **consistently reaches the 2048 tile** and has
+achieved the **4096 tile** (score of 60,496 in a single game). No plateau observed,
+all metrics are still improving.

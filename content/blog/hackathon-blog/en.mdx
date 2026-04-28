@@ -1,0 +1,160 @@
+---
+title: "Building an AI Help Center in 3 Days: RAG and Leadership at a Hackathon"
+date: "2025-11-10"
+description: "How our team designed a RAG pipeline to transform a university help center, and what I learned leading four developers under time pressure."
+tags: ["Hackathon", "RAG (Retrieval Augmented Generation)", "Elasticsearch", "Embeddings", "NLP", "FastAPI", "Leadership", "Project managment", "Python"]
+---
+
+Thousands of students, ~400 entries in a knowledge base, and manual keyword search as the only tool. Pôle Léonard de Vinci wanted a conversational agent capable of understanding the context behind a question and returning the best possible answer, ready to be plugged into their existing portal. Deadline: 3 hackathon days.
+
+Our team of four won the Automation track of the ESILV x IBM Hackathon with this project.
+
+## The Challenge
+
+The current Help Center covers enrollment, IT issues, administrative procedures, and campus life. The brief called for a POC able to:
+
+- Ingest the existing Q&A dataset in Excel format (~400 rows)
+- Understand the context behind a student's question
+- Return the best possible answer in HTML format
+- Redirect to a support form when no answer exists
+- Improve over time by logging interactions
+
+One constraint shaped our architecture from the start: the school's IT department runs **Vue.js** and **MariaDB**. Whatever we built had to integrate into that technical environment, or it would never be deployed.
+
+## Architecture: Three Services, One Pipeline
+
+We split the system into three independent services connected by REST APIs:
+
+1. **Embeddings service** (Python/FastAPI, port 8000): the core intelligence. Generates vector embeddings, indexes them in Elasticsearch, handles semantic search and LLM synthesis.
+2. **User application** (Vue.js + Express.js): the student-facing chatbot. Sends queries to the embeddings service, renders HTML responses, collects feedback.
+3. **Admin application** (Vue.js + Express.js): content management, analytics dashboard, support ticket tracking.
+
+MariaDB stores relational data (questions, feedback, support tickets). Elasticsearch stores the vector index. Both applications read from the same database; the embeddings service keeps Elasticsearch in sync.
+
+This separation allowed each team member to work on a service independently, which proved crucial given the time constraint.
+
+## The RAG Pipeline
+
+The heart of the system is a four-step pipeline inside the FastAPI service:
+
+```
+User question → Embedding → Elasticsearch cosine search → Top-K → LLM synthesis
+```
+
+### Indexing
+
+When an admin publishes or updates content, the `/build_index` endpoint reads all published questions from MariaDB, generates an embedding for each one using OpenAI's `text-embedding-3-small` (1536 dimensions), and indexes the result in Elasticsearch with a `dense_vector` mapping:
+
+```python
+es.indices.create(
+    index=ES_INDEX,
+    mappings={
+        "properties": {
+            "embedding": {
+                "type": "dense_vector",
+                "dims": 1536,
+                "index": True,
+                "similarity": "cosine"
+            },
+            # question, answer, category, language, schools...
+        }
+    }
+)
+```
+
+~400 questions indexed, each transformed into a 1536-dimensional vector.
+
+### Semantic Search
+
+When a student asks a question, the `/ask` endpoint generates an embedding for the query and runs a cosine similarity search against the index:
+
+```python
+results = es.search(
+    index=ES_INDEX,
+    size=top_k,
+    query={
+        "script_score": {
+            "query": {"match_all": {}},
+            "script": {
+                "source": "cosineSimilarity(params.query_vector, 'embedding') + 1.0",
+                "params": {"query_vector": query_embedding}
+            }
+        }
+    }
+)
+```
+
+The first thing we tried was classic full-text search in Elasticsearch. Results were decent when the student's question used the same words as the knowledge base, but as soon as the phrasing changed like "I can't connect to the wifi" vs "network connection issue", the engine found nothing relevant. We needed a semantic approach.
+
+We switched to vector embeddings with cosine similarity. The difference was immediate: questions phrased differently but covering the same topic finally surfaced the right results.
+
+### LLM Synthesis
+
+The top results are passed to GPT-4o-mini with a carefully crafted system prompt. The model must answer **strictly from the provided excerpts**, cite its sources, and return structured JSON with an `answer_html` field. JSON output is enforced with `response_format={"type": "json_object"}`.
+
+The response schema is standardized:
+
+```json
+{
+  "language": "fr",
+  "answered": true,
+  "answer_html": "<p><strong>Réponse :</strong> ...</p>",
+  "used_source_ids": ["doc_017", "doc_042"],
+  "citations": [{"id": "doc_017", "title": "...", "url": "..."}],
+  "redirect": {"needed": false, "label": null, "url": null}
+}
+```
+
+Our first version of the system prompt let the LLM rephrase freely. The problem: it invented details that didn't exist in the excerpts. We tightened the prompt to forbid any information beyond the provided excerpts and added a redirect mechanism. When the LLM cannot answer, it returns `answered: false` and the frontend displays a link to the support form. This was a school requirement: no hallucinated answers, ever.
+
+### Synchronization
+
+The `/sync` endpoint compares the state of MariaDB against Elasticsearch, removes retired documents, and indexes new ones. This keeps the search index up to date without a full rebuild.
+
+## The Feedback Loop
+
+Every chatbot response includes a thumbs up/thumbs down button. This feedback is stored alongside the original query, the matched question ID, and the similarity score.
+
+The admin dashboard exposes this data as analytics: which questions are asked most often, which answers have a low satisfaction rate, where the gaps in the knowledge base are.
+
+This was the "self-learning" aspect requested in the brief. Not automated retraining, but a concrete data pipeline that helps administrators identify what content to add or improve.
+
+## Leading a Team of Four in 72 Hours
+
+My first experience as team leader on a technical project under real pressure. Four people, three days, a working demo to deliver.
+
+**Splitting work along service boundaries.** The three-service architecture wasn't just a technical choice, it was a project management decision. Each service had its own directory, its own server, its own port. That let us work in parallel without stepping on each other's code.
+
+I assigned responsibilities early: one person on the embeddings pipeline, one on the user frontend, one on the admin application. I moved between the three to handle integration, database schema design, and the presentation.
+
+**Keeping scope under control.** The brief was full of ideas: self-learning, multilingual support, mobile interface. We made deliberate choices about what to build and what to cut. The priority was a working RAG pipeline with accurate answers. UI polish came second.
+
+Features like automated retraining were scoped down to a feedback collection system that could support it later. Every delivered feature worked end to end.
+
+**Communication as the bottleneck.** In a 72-hour sprint, the biggest risk isn't technical difficulty, it's misalignment. Someone builds an endpoint that returns data in a format nobody expected. Someone modifies a database table without telling the person querying it.
+
+I learned that as team leader, my most valuable contribution wasn't writing the most code, but making sure everyone knew what the others were doing. Quick check-ins at the start and end of each work session. A shared document with the current state of each component. Surfacing blockers early rather than waiting for them to cascade.
+
+## Stack Summary
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>Technology</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>User frontend</td><td>Vue.js 3, Vite</td></tr>
+    <tr><td>Admin frontend</td><td>Vue.js 3, Vite, Chart.js</td></tr>
+    <tr><td>User backend</td><td>Express.js</td></tr>
+    <tr><td>Admin backend</td><td>Express.js</td></tr>
+    <tr><td>RAG service</td><td>FastAPI, OpenAI API</td></tr>
+    <tr><td>Vector search</td><td>Elasticsearch 8.x</td></tr>
+    <tr><td>Database</td><td>MariaDB</td></tr>
+    <tr><td>Embeddings</td><td>text-embedding-3-small (1536d)</td></tr>
+    <tr><td>LLM</td><td>GPT-4o-mini</td></tr>
+  </tbody>
+</table>
+
+---
+
+
+Built in 3 days by Corentin, Maxime Langelier, Vianney Le Bourhis and Noé Le Yhuelic at the ESILV x IBM Hackathon.

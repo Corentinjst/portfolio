@@ -1,0 +1,79 @@
+---
+title: "SatGen - Satellite Image Generation"
+date: "2026-01-23"
+description: "Realistic satellite image generation from road and building segmentation masks"
+tags: ["Python", "PyTorch", "Deep Learning", "GAN", "Computer Vision", "Hugging Face", "TensorBoard"]
+github_url: "https://github.com/Guereak/SatGen-CV"
+cover_image: "/images/projects/sat-gen.png"
+featured: false
+---
+
+## Context
+
+**Computer Vision** project carried out in the final year of engineering school (ESILV A5).
+The goal: generate **photorealistic satellite images** from simple segmentation masks indicating
+roads and buildings. The model synthesizes images of **arbitrary size** without visible seams,
+paving the way for the creation of synthetic data to train aerial detection models.
+
+## Problem Statement
+
+Annotated satellite images are scarce and expensive to produce. Generating realistic images
+from segmentation masks would allow massive augmentation of existing datasets.
+The main challenge is twofold: producing visually convincing images at the patch level (256×256),
+then assembling them into large-scale images **without border artifacts**.
+
+## Solution
+
+Full **conditional Pix2Pix** (cGAN) pipeline with several innovations:
+
+- **Dual-channel input**: roads (channel 0) and buildings (channel 1) are separated into two
+  distinct channels, providing fine-grained control over generation.
+- **U-Net Generator** (~54M parameters): 8 encoding/decoding blocks with skip connections,
+  Instance Normalization and dropout kept at inference for stochastic diversity.
+- **PatchGAN Discriminator**: 70×70 patch-level classification with Spectral Normalization
+  for training stability.
+- **Multi-layer Perceptual Loss**: VGG-19 feature extraction across 5 levels to
+  preserve natural textures beyond simple pixel-to-pixel reconstruction.
+- **Cosine-fade blending**: seamless patch assembly with 50% overlap and cosine
+  transition, eliminating visible seams on large images.
+- **SAM3 (Segment Anything Model)**: automatic generation of complementary masks
+  to enrich existing annotations via weak supervision.
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Data</td><td>Massachusetts Roads Dataset, Inria Aerial Image Labeling, SAM3</td></tr>
+    <tr><td>Preprocessing</td><td>NumPy, OpenCV, Pillow, dual-channel encoding</td></tr>
+    <tr><td>Model</td><td>Pix2Pix (U-Net + PatchGAN), PyTorch</td></tr>
+    <tr><td>Losses</td><td>Adversarial (BCE) + L1 + Perceptual (VGG-19)</td></tr>
+    <tr><td>Inference</td><td>SeamlessGenerator, cosine-fade blending, noise strategies</td></tr>
+    <tr><td>API</td><td>FastAPI, deployment on Hugging Face Hub</td></tr>
+    <tr><td>Monitoring</td><td>TensorBoard, Jupyter notebooks</td></tr>
+  </tbody>
+</table>
+
+## Key Technical Choices
+
+- **Instance Normalization** rather than BatchNorm to remove dependency on batch size
+  and allow flexible inference.
+- **Spectral Normalization** on the discriminator to prevent it from dominating training.
+- **Label smoothing** (real=0.9) to prevent mode collapse.
+- **Dropout at inference**: a deliberate choice specific to Pix2Pix, enabling stochastic
+  variations to be generated on each call.
+- **Cosine Annealing** of the learning rate with η_min = 1e-6 for stable training.
+- **Multiple noise strategies** (Gaussian, Uniform, Sparse, Per-Channel) for empty mask
+  areas, avoiding generation artifacts.
+
+## Results
+
+The model generates visually realistic satellite images with consistent textures for
+roads, buildings, and vegetation. The seamless blending pipeline produces images of
+arbitrary size without visible seams, validating the approach for large-scale synthetic
+data generation.
+
+The model is available on the **Hugging Face Hub** and accessible via a **FastAPI REST API**
+as well as an **interactive web interface**.

@@ -1,0 +1,66 @@
+---
+title: "IBM Hackathon Winner - RAG Help Center Chatbot"
+date: "2025-11-05"
+description: "Intelligent BI pipeline developed during an IBM hackathon: semantic search, RAG and analytical dashboard"
+tags: ["RAG (Retrieval Augmented Generation)", "ElasticSearch", "Embeddings", "NLP", "FastAPI", "MariaDB", "Python"]
+github_url: "https://github.com/Corentinjst/IBM-Hackathon-BI-Pipeline"
+cover_image: "/images/projects/hackathon-ibm.png"
+featured: true
+---
+
+## Context
+
+Project built during an IBM hackathon centered around Business Intelligence. I led a team of 4
+developers with the mission of designing an intelligent question-answering system powered by an
+existing knowledge base.
+
+## Problem Statement
+
+Enable students at Pôle Léonard de Vinci to query a knowledge base (help center) in natural
+language and receive synthesized, sourced answers without having to manually browse
+through articles.
+
+## Solution
+
+Implementation of a **RAG (Retrieval-Augmented Generation)** system combining a relational
+database, a vector search engine and a LLM:
+
+- **Ingestion**: help center content is stored in MariaDB and indexed as vectors in
+  Elasticsearch via the OpenAI embeddings API (`text-embedding-3-small`).
+- **Semantic search**: for each user query, cosine similarity is computed to retrieve the
+  most relevant passages.
+- **Synthesis**: GPT-4o-mini generates a coherent response from the retrieved documents,
+  with source citations.
+- **Feedback loop**: user feedback is recorded to monitor response quality.
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Frontend</td><td>Vue.js 3, Vite, Chart.js</td></tr>
+    <tr><td>Backend</td><td>Express.js (Node), FastAPI (Python)</td></tr>
+    <tr><td>Database</td><td>MariaDB / MySQL</td></tr>
+    <tr><td>Vector search</td><td>Elasticsearch 8.x</td></tr>
+    <tr><td>AI</td><td>OpenAI Embeddings + GPT-4o-mini</td></tr>
+  </tbody>
+</table>
+
+Two separate applications were developed:
+- **Admin App** - content management, analytics dashboard, feedback tracking
+- **User App** - public search and Q&A interface
+
+## My Role
+
+As **team leader**, I coordinated the development efforts within the team,
+defined the overall project architecture and oversaw the integration of the various
+technical components (RAG pipeline, Elasticsearch/MariaDB synchronization, unified API).
+
+## IBM Certifications Earned
+
+- IBM Watsonx Technical Essentials
+- IBM Watsonx Data Technical Essentials
+- Generative AI in Action
+- Getting Started with Generative AI

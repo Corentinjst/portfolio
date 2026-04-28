@@ -1,0 +1,94 @@
+---
+title: "Voice Assistant AI Agent"
+date: "2026-01-15"
+description: "Multi-agent voice assistant for the restaurant industry, with multilingual support, phone integration, RAG and analytics dashboard"
+tags: ["Python", "LangChain", "LangGraph", "RAG (Retrieval Augmented Generation)", "PostgreSQL", "ChromaDB", "Twilio"]
+github_url: "https://github.com/Noway92/Voice-Assistant-AI-Agent"
+cover_image: "/images/projects/voice-assistant.png"
+featured: false
+---
+
+## Context
+
+Group project completed as part of the **LLM & Generative AI** course at ESILV (A5).
+The goal: design an **intelligent voice assistant** capable of handling customer
+interactions for a restaurant such as reservation booking, orders and general inquiries, by voice
+or over the phone, in multiple languages.
+
+## Problem Statement
+
+A restaurant receives a wide variety of requests (reservations, orders, menu questions,
+opening hours, allergens…) potentially in multiple languages. Automating these voice
+interactions requires coordinating speech recognition, natural language understanding,
+access to business data and speech synthesis, while maintaining a coherent and
+contextual dialogue.
+
+## Solution
+
+**Multi-agent** architecture orchestrated by LangGraph, where each type of request is
+routed to a specialized agent:
+
+- **Orchestrator**: classifies the user's intent (reservation, order,
+  inquiry) and routes to the appropriate agent. Manages conversation history and
+  implements retry logic in case of errors.
+- **Reservation Agent**: checks table availability, creates, modifies or cancels
+  reservations using tools connected to the PostgreSQL database.
+- **Order Agent**: handles the complete order lifecycle (creation, adding/editing
+  items, finalization) with support for dine-in, takeaway and delivery.
+- **Information Agent (RAG)**: answers general questions (menu, opening hours,
+  location, allergens, special offers) through a **Retrieval-Augmented
+  Generation** system powered by ChromaDB.
+
+### Voice Pipeline
+
+1. **Speech-to-Text** - Whisper (OpenAI) or Vosk (offline)
+2. **Language Detection** - langdetect + automatic translation to English
+3. **Agent Processing** - reasoning and tool execution (ReAct pattern)
+4. **Back-Translation** - response translated back into the original language
+5. **Text-to-Speech** - OpenAI TTS, pyttsx3 (offline) or custom fine-tuned XTTS model
+
+### Two Deployment Modes
+
+- **Computer Mode**: direct voice interaction via microphone and speakers
+- **Phone Mode**: Twilio integration with a Flask webhook server and ngrok tunneling
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Speech-to-Text</td><td>OpenAI Whisper, Vosk</td></tr>
+    <tr><td>AI Orchestration</td><td>LangChain, LangGraph, OpenAI GPT-4o-mini, Ollama (offline)</td></tr>
+    <tr><td>RAG</td><td>ChromaDB, OpenAI Embeddings (text-embedding-3-small)</td></tr>
+    <tr><td>Database</td><td>PostgreSQL, SQLAlchemy</td></tr>
+    <tr><td>Telephony</td><td>Twilio, Flask, ngrok</td></tr>
+    <tr><td>Text-to-Speech</td><td>OpenAI TTS, pyttsx3, custom XTTS (PyTorch + CUDA)</td></tr>
+    <tr><td>Multilingual</td><td>langdetect, deep-translator</td></tr>
+    <tr><td>Dashboard</td><td>Streamlit, Pandas</td></tr>
+    <tr><td>Evaluation</td><td>RAGAS, pytest</td></tr>
+  </tbody>
+</table>
+
+## Key Features
+
+- **Multilingual support**: automatic language detection and seamless translation,
+  allowing customers to communicate in their native language.
+- **Contextual RAG**: vector knowledge base (ChromaDB) fed with restaurant data
+  for accurate and up-to-date responses.
+- **Analytics dashboard**: Streamlit interface for tracking KPIs (reservations,
+  orders, revenue, menu and table management).
+- **Custom TTS**: XTTS model fine-tuned on Hugging Face for a personalized
+  and natural voice, with GPU acceleration.
+- **Offline mode**: operation without an internet connection thanks to Ollama (local LLM),
+  Vosk (STT) and pyttsx3 (TTS).
+
+## Evaluation
+
+A comprehensive evaluation framework was put in place:
+
+- **Intent classification**: routing accuracy toward the correct agent
+- **Agent success rate**: ability to complete the requested tasks
+- **RAG metrics**: MRR, Precision@K, Hit Rate via the RAGAS framework
+- **End-to-end tests**: complete conversational scenarios with conversation history

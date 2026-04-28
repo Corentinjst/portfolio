@@ -1,0 +1,60 @@
+---
+title: "Deep Learning Specialization: what 5 Andrew Ng's courses taught me"
+date: "2026-04-03"
+description: "How Andrew Ng's Deep Learning Specialization bridged the gap between academic theory and the practice of deep learning."
+tags: ["Deep Learning", "Réseaux de neurones", "Optimisation", "CNN", "RNN"]
+---
+
+# Deep Learning Specialization: what 5 Andrew Ng courses taught me beyond engineering school
+
+Knowing how backpropagation works and knowing when to apply it on a real project are two different things. In my second year of a Data & AI Master's at ESILV, I had studied neural networks, CNNs, and loss functions. I knew *what they were*. What I didn't know was *how to diagnose a stalling model* or *why to choose Adam over SGD on a given problem*. The <a href="https://www.coursera.org/specializations/deep-learning" target="_blank" rel="noopener noreferrer">Deep Learning Specialization</a> by Andrew Ng bridged that gap.
+
+> 🔗 <a href="https://coursera.org/share/a3ff8baeb6efb06b0507307d6935c45e" target="_blank" rel="noopener noreferrer">View my certification</a>
+
+## What Andrew Ng explains differently
+
+The specialization covers five courses, from basic neural networks all the way to Transformers. On paper, I was already familiar with most of these concepts. The difference: Andrew Ng grounds every concept in **intuition** before formalizing it. Where an academic course sometimes chains formulas together, this specialization takes the opposite approach : you first understand *why* a mechanism works, then dive into *how*.
+
+Concretely, here's what that changes:
+
+**Optimization**: In class, Adam is just another hyperparameter. In the specialization, it's a design choice that depends on the problem. Each optimizer has a behavior, strengths and limitations, and the choice depends on training dynamics, not a default value.
+
+**Regularization**: Dropout, batch normalization, early stopping, I was already using them. The specialization gave me a framework to know *which one to apply first* based on the model's diagnosis. Before adding regularization, you need to understand whether the problem comes from bias, variance, or something else and the answer isn't always dropout.
+
+**CNNs**: From classic architectures (LeNet, VGG) to ResNet and Inception, the course details the design choices behind each architecture. Why skip connections in ResNet? Why different kernel sizes in Inception? Understanding these decisions is what allows you to design an architecture suited to your own problem rather than stacking layers at random.
+
+**Sequence models**: RNN, GRU, LSTM, then attention mechanisms and the Transformer architecture. Understanding the evolution of these architectures like why the field moved from RNNs to Transformers, gives a perspective that illuminates the current state of the field.
+
+## The real discovery: structuring an ML project
+
+While the technical concepts reinforced what I already knew, it was Course 3 - *Structuring Machine Learning Projects* that brought me the most genuinely new insights.
+
+Before this specialization, I had never approached the methodology of managing an ML/DL project in such a concrete way. Andrew Ng shares reflexes drawn from his industry experience: error analysis, choosing between bias and variance to focus your efforts, defining meaningful evaluation metrics, and the concept of "human-level performance" as a reference baseline.
+
+These lessons changed how I approach a project. A few principles that now guide me on a daily basis:
+
+- **Diagnose before acting**: when faced with an underperforming model, identify whether the problem comes from bias or variance before touching anything.
+- **Iterate fast**: start with a simple model, measure, then improve in a targeted way rather than chasing the perfect architecture from the start.
+- **Define a single evaluation metric**: to stay on course and avoid spreading efforts across contradictory objectives.
+
+## Concrete application: from course to the 2048 project
+
+The most direct example: my [Deep Reinforcement Learning agent on 2048](https://github.com/Corentinjst/2048-RL). After 10M training steps, the average score plateaued around ~3,500 and the max tile was stuck at 512. Before the specialization, my instinct would have been to change the architecture or increase the number of steps.
+
+The bias/variance diagnostic approach from Course 3 pointed me elsewhere. TensorBoard showed an **explosive value_loss of 2,153**: the critic was failing to predict future returns. The problem wasn't the model, it was the reward scale. I added **VecNormalize** (4 lines of code) to normalize rewards to zero mean and unit variance. Result: value_loss dropped to 0.03, average score jumped from 3,500 to **27,461**, and the **4096** tile was reached.
+
+Without the "diagnose before acting" methodology from the specialization, I would have wasted weeks tweaking the wrong parameters.
+
+In a work-study context, this rigor makes even more sense. When models are meant to be deployed in production and influence business decisions, knowing how to diagnose an ML pipeline before modifying it isn't a luxury, it's what separates a relevant adjustment from a costly round of guesswork.
+
+## What the course doesn't cover: making ML understandable
+
+Despite all the valuable lessons this specialization offers, there's one aspect it doesn't address, it's something I discovered in the field, through my work-study experience: the importance of making the entire ML process readable for non-technical stakeholders.
+
+A model can have excellent performance, a flawless pipeline, and green metrics across the board, if the end users don't understand the logic behind the results, they won't trust them. And a model nobody trusts is, in practice, useless.
+
+What I learned in the workplace is that the story told by the entire process matters almost as much as the model's performance itself. From data selection and processing all the way to predictions and the resulting KPIs, every step needs to be explainable clearly to someone who knows neither Python nor gradient descent. If a decision-maker doesn't understand why the model recommends a given action, they won't accept it and all the upstream technical work loses its purpose.
+
+This is a common blind spot in technical training, including this one. A well-built model that's incomprehensible to its users is worthless. A well-explained model that's poorly diagnosed won't hold up in production. The specialization taught me how to build. The field taught me how to convince.
+
+For a student or engineer who already has the fundamentals: this specialization doesn't teach you deep learning, it teaches you how to use it.

@@ -11,6 +11,10 @@ import type { ReactElement } from 'react'
 const projectsDir = path.join(process.cwd(), 'content/projects')
 const blogDir = path.join(process.cwd(), 'content/blog')
 
+const FALLBACK_LOCALE = 'fr'
+
+export type ContentLocale = 'fr' | 'en'
+
 function calculateReadingTime(content: string): number {
   const words = content.trim().split(/\s+/).length
   return Math.ceil(words / 200)
@@ -23,17 +27,34 @@ const mdxOptions = {
   },
 }
 
+function resolveMdxPath(dir: string, slug: string, locale: string): string | null {
+  const localized = path.join(dir, slug, `${locale}.mdx`)
+  if (fs.existsSync(localized)) return localized
+  const fallback = path.join(dir, slug, `${FALLBACK_LOCALE}.mdx`)
+  if (fs.existsSync(fallback)) return fallback
+  return null
+}
+
+function listSlugs(dir: string): string[] {
+  if (!fs.existsSync(dir)) return []
+  return fs.readdirSync(dir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+}
+
 // --- Projects ---
 
-export async function getAllProjects(): Promise<Project[]> {
-  const files = fs.readdirSync(projectsDir).filter((f) => f.endsWith('.mdx'))
+export async function getAllProjects(locale: ContentLocale = FALLBACK_LOCALE): Promise<Project[]> {
+  const slugs = listSlugs(projectsDir)
 
-  const projects = files.map((filename) => {
-    const slug = filename.replace(/\.mdx$/, '')
-    const raw = fs.readFileSync(path.join(projectsDir, filename), 'utf-8')
+  const projects: Project[] = []
+  for (const slug of slugs) {
+    const filePath = resolveMdxPath(projectsDir, slug, locale)
+    if (!filePath) continue
+    const raw = fs.readFileSync(filePath, 'utf-8')
     const { data, content } = matter(raw)
 
-    return {
+    projects.push({
       slug,
       content,
       title: typeof data.title === 'string' ? data.title : '',
@@ -44,17 +65,24 @@ export async function getAllProjects(): Promise<Project[]> {
       demo_url: typeof data.demo_url === 'string' ? data.demo_url : undefined,
       cover_image: typeof data.cover_image === 'string' ? data.cover_image : undefined,
       featured: typeof data.featured === 'boolean' ? data.featured : undefined,
-    } satisfies Project
-  })
+    })
+  }
 
   return projects.sort((a, b) => (a.date < b.date ? 1 : -1))
 }
 
-export async function getProjectBySlug(slug: string): Promise<{
+export async function getProjectBySlug(
+  slug: string,
+  locale: ContentLocale = FALLBACK_LOCALE,
+): Promise<{
   meta: Project
   mdxContent: ReactElement
 }> {
-  const raw = fs.readFileSync(path.join(projectsDir, `${slug}.mdx`), 'utf-8')
+  const filePath = resolveMdxPath(projectsDir, slug, locale)
+  if (!filePath) {
+    throw new Error(`Project not found: ${slug}`)
+  }
+  const raw = fs.readFileSync(filePath, 'utf-8')
   const { data, content } = matter(raw)
 
   const { content: mdxContent } = await compileMDX({
@@ -80,15 +108,17 @@ export async function getProjectBySlug(slug: string): Promise<{
 
 // --- Blog Posts ---
 
-export async function getAllBlogPosts(): Promise<BlogPost[]> {
-  const files = fs.readdirSync(blogDir).filter((f) => f.endsWith('.mdx'))
+export async function getAllBlogPosts(locale: ContentLocale = FALLBACK_LOCALE): Promise<BlogPost[]> {
+  const slugs = listSlugs(blogDir)
 
-  const posts = files.map((filename) => {
-    const slug = filename.replace(/\.mdx$/, '')
-    const raw = fs.readFileSync(path.join(blogDir, filename), 'utf-8')
+  const posts: BlogPost[] = []
+  for (const slug of slugs) {
+    const filePath = resolveMdxPath(blogDir, slug, locale)
+    if (!filePath) continue
+    const raw = fs.readFileSync(filePath, 'utf-8')
     const { data, content } = matter(raw)
 
-    return {
+    posts.push({
       slug,
       content,
       title: typeof data.title === 'string' ? data.title : '',
@@ -96,17 +126,24 @@ export async function getAllBlogPosts(): Promise<BlogPost[]> {
       description: typeof data.description === 'string' ? data.description : '',
       tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
       readingTime: calculateReadingTime(content),
-    } satisfies BlogPost
-  })
+    })
+  }
 
   return posts.sort((a, b) => (a.date < b.date ? 1 : -1))
 }
 
-export async function getBlogPostBySlug(slug: string): Promise<{
+export async function getBlogPostBySlug(
+  slug: string,
+  locale: ContentLocale = FALLBACK_LOCALE,
+): Promise<{
   meta: BlogPost
   mdxContent: ReactElement
 }> {
-  const raw = fs.readFileSync(path.join(blogDir, `${slug}.mdx`), 'utf-8')
+  const filePath = resolveMdxPath(blogDir, slug, locale)
+  if (!filePath) {
+    throw new Error(`Blog post not found: ${slug}`)
+  }
+  const raw = fs.readFileSync(filePath, 'utf-8')
   const { data, content } = matter(raw)
 
   const { content: mdxContent } = await compileMDX({
