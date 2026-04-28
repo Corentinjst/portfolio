@@ -1,0 +1,133 @@
+{
+  "Metadata": {
+    "title": "Corentin Juste - Data Scientist",
+    "titleTemplate": "%s | Corentin Juste",
+    "description": "Portfolio of Corentin Juste",
+    "siteName": "Corentin Juste - Data Scientist",
+    "ogLocale": "en_US"
+  },
+  "Navbar": {
+    "home": "Home",
+    "parcours": "Career",
+    "blog": "Blog",
+    "projects": "Projects",
+    "toggleMenu": "Toggle navigation"
+  },
+  "LocaleSwitcher": {
+    "label": "Switch language",
+    "fr": "FR",
+    "en": "EN"
+  },
+  "Hero": {
+    "title": "Corentin Juste",
+    "subtitlePrefix": "Data Scientist · ",
+    "subtitleHighlight1": "Machine Learning",
+    "subtitleConnector": " & ",
+    "subtitleHighlight2": "NLP",
+    "bioParagraph1": "As a data scientist with two years of work-study experience in the banking sector, I have had the opportunity to work on projects where data has a direct impact on the business: evaluating the effectiveness of marketing campaigns, detecting transactions to crypto platforms, and optimising and automating credit risk and fraud reporting.",
+    "bioParagraph2": "What drives me is both the technical depth of a well-designed model and the tangible impact it can have on operational business decisions. I’m particularly drawn to the fast-evolving nature of the field: tools keep improving, and the solutions we build are becoming increasingly ambitious. This constant need to adapt is both an intellectual challenge and a source of motivation for me.",
+    "bioParagraph3": "I’m now looking for my first full-time role as a Data Scientist or AI Engineer, in a stimulating environment where I can continue to grow and take on new challenges.",
+    "ctaLinkedIn": "LinkedIn",
+    "ctaGithub": "GitHub",
+    "ctaContact": "Contact",
+    "ctaCv": "CV"
+  },
+  "Parcours": {
+    "sectionLabel": "Experience",
+    "sectionTitle": "Career",
+    "helperText": "Click on an experience to see the details.",
+    "experiences": [
+      {
+        "period": "March 2025 - Present",
+        "title": "Data Scientist Apprentice",
+        "company": "CCF, La Défense, Courbevoie",
+        "preview": "Measured CRM campaigns' performance and detected flows to crypto platforms using NLP.",
+        "role": "As part of the CCF Data team, I work on two main areas: evaluating the true impact of CRM campaigns on customer behavior, and detecting financial flows to cryptocurrency platforms for regulatory compliance (KYC) purposes.",
+        "responsibilities": [
+          "Designed a causal inference methodology to evaluate CRM campaigns, addressing the absence of control groups in campaign targeting",
+          "Built monthly synthetic control groups using Propensity Score Matching (PSM) to reconstruct counterfactuals and isolate the campaigns’ incremental impact",
+          "Developed a Power BI dashboard to monitor post-campaign customer behavior (subscriptions, incoming/outgoing financial flows over a two-month period)",
+          "Developed an NLP-based classification pipeline on banking transaction labels to identify flows to cryptocurrency platforms",
+          "Contributed to regulatory compliance and customer due diligence (KYC) initiatives"
+        ],
+        "accomplishments": [
+          "Delivered the first reliable measurement of CRM campaigns’ incremental impact at CCF, enabling a clear distinction between generated revenue and natural customer behavior trends",
+          "Deployed a production-ready NLP model for classifying banking transactions"
+        ],
+        "skills": ["Python", "SQL", "NLP", "Scikit-learn", "Propensity Score Matching", "Power BI", "Git"]
+      },
+      {
+        "period": "Sept. 2024 - March 2025",
+        "title": "Data Project Assistant Apprentice",
+        "company": "CCF, La Défense, Courbevoie",
+        "preview": "Designed and deployed a Power BI dashboard for operational monitoring of CRM campaigns, updated daily.",
+        "role": "My first assignment at CCF Bank, where I joined the CRM team. I built a multi-channel campaign performance tracking tool that became the team’s go-to solution for daily operational monitoring.",
+        "responsibilities": [
+          "Designed and deployed a Power BI dashboard for operational monitoring of CRM campaigns, updated on a daily basis",
+          "Tracked end-to-end campaign performance across all channels, including open rates, attachment click-through rates, and unsubscribe rates",
+          "Maintained and enhanced the tool based on feedback and evolving needs from the CRM team"
+        ],
+        "accomplishments": [
+          "Dashboard adopted as the internal reference tool for daily campaign performance monitoring by the CRM team"
+        ],
+        "skills": ["SQL", "Power BI", "Data Visualization", "Reporting"]
+      },
+      {
+        "period": "June 2023 - August 2023",
+        "title": "Data Analyst Intern",
+        "company": "SIPLEC E.LECLERC, Ivry-sur-Seine",
+        "preview": "Designed and deployed a Qlik Sense dashboard to monitor IT support activity within the Information Systems department.",
+        "role": "As part of the IT application support team, working closely with business teams, I designed and developed an operational monitoring tool to track service quality in real time and identify bottlenecks in request handling.",
+        "responsibilities": [
+          "Designed and developed a Qlik Sense dashboard to monitor support activity",
+          "Tracked key operational KPIs, including response rate, resolution time, and resolution rate based on ticket criticality",
+          "Identified bottlenecks in support request processing"
+        ],
+        "accomplishments": [
+          "Delivered a tool enabling the team to monitor service quality in real time, adopted for daily operational tracking of support activity"
+        ],
+        "skills": ["SQL", "Qlik Sense", "Data Visualization", "Reporting"]
+      }
+    ]
+  },
+  "ProjectsSection": {
+    "sectionLabel": "Portfolio",
+    "sectionTitle": "My projects",
+    "sectionDescription": "Real problems, real data, measurable results."
+  },
+  "BlogSection": {
+    "sectionLabel": "Blog",
+    "sectionTitle": "Articles",
+    "sectionDescription": "Field notes, tutorials and reflections on Data Science in production."
+  },
+  "ProjectCard": {
+    "viewGithub": "GitHub",
+    "viewDemo": "Demo",
+    "viewDetails": "View details →",
+    "githubAriaLabel": "View on GitHub",
+    "demoAriaLabel": "View demo"
+  },
+  "BlogCard": {
+    "readingTime": "{minutes} min read",
+    "readArticle": "Read article →"
+  },
+  "ExperienceItem": {
+    "roleOverview": "Role overview",
+    "responsibilities": "Key responsibilities",
+    "accomplishments": "Accomplishments",
+    "skills": "Technologies & skills",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  },
+  "Footer": {
+    "copyright": "© {year} Corentin Juste - Data Scientist",
+    "githubAriaLabel": "GitHub",
+    "linkedinAriaLabel": "LinkedIn",
+    "emailAriaLabel": "Email"
+  },
+  "BlogPost": {
+    "back": "← Back to articles",
+    "readingTime": "{minutes} min read",
+    "notFound": "Article not found"
+  }
+}
