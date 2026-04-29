@@ -1,0 +1,97 @@
+---
+title: "TerraBot - Infrastructure as Conversation"
+date: "2026-04-30"
+description: "Chatbot that turns cloud infrastructure requirements into Terraform with real-time cost estimates."
+tags: ["LangGraph", "Terraform", "GraphQL", "LLM", "Python", "Streamlit"]
+github_url: "https://github.com/Corentinjst/TerraBot"
+cover_image: "/images/projects/terrabot.jpg"
+featured: true
+---
+
+## Context
+
+A project aimed at simplifying cloud infrastructure provisioning through a
+**conversational agent**. The idea: replace the manual configuration of Terraform files
+with a natural language dialogue, while providing **comparative cost estimates**
+across AWS, GCP and Azure before any deployment.
+
+## Problem
+
+Creating cloud infrastructure with Terraform requires deep technical expertise:
+knowledge of providers, available resources, pricing constraints and architectural
+best practices. This high barrier to entry slows down teams that want to deploy
+quickly without a dedicated DevOps specialist.
+
+## Solution
+
+An LLM agent orchestrated by **LangGraph** that guides the user through a structured
+conversation, extracts architecture requirements, compares costs across providers and generates
+the corresponding `.tf` file:
+
+- **Requirements gathering**: the agent asks the right questions to extract the target provider,
+  region, required services, budget and availability constraints.
+- **Cost estimation**: queries to the **Infracost GraphQL API** to price the candidate architecture
+  in real time across the three major clouds.
+- **Argued proposal**: a summary of the most suitable design with justification for the provider
+  choice and a monthly cost projection.
+- **Terraform generation**: production of a `.tf` file validated by `terraform validate`,
+  triggered only after explicit user confirmation.
+- **Live streaming**: LLM tokens are streamed directly into the Streamlit interface
+  for a smooth and responsive experience.
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>LLM</td><td>Claude (Anthropic API) via langchain-anthropic</td></tr>
+    <tr><td>Orchestration</td><td>LangGraph - state graph with conditional routing</td></tr>
+    <tr><td>UI</td><td>Streamlit with token streaming</td></tr>
+    <tr><td>Pricing API</td><td>Infracost GraphQL (+ offline mock)</td></tr>
+    <tr><td>HTTP / GraphQL</td><td>gql + httpx (async client)</td></tr>
+    <tr><td>IaC</td><td>Terraform + terraform validate</td></tr>
+    <tr><td>Config & validation</td><td>pydantic-settings, Pydantic v2</td></tr>
+    <tr><td>Tests</td><td>pytest + pytest-asyncio</td></tr>
+  </tbody>
+</table>
+
+## Agent Pipeline
+
+The agent progresses through five explicit nodes with conditional routing:
+
+- **`gather_requirements`** - multi-turn dialogue to extract requirements (provider, region,
+  services, budget, SLA).
+- **`fetch_pricing`** - Infracost queries to price candidate architectures on AWS,
+  GCP and Azure.
+- **`propose_architecture`** - synthesis of the optimal design with a cost comparison and
+  justification.
+- **`await_confirmation`** - explicit validation checkpoint before any code generation.
+- **`generate_terraform`** - production and validation of the final `.tf` file.
+
+## Notable Technical Points
+
+- **Infracost mock mode**: a realistic mock client enables development and demos
+  without an API key, toggled via an environment variable (`USE_MOCK_INFRACOST=true`).
+- **Typed GraphState**: the conversation state is modelled with strict Pydantic types
+  (`GraphState`, `ArchitectureRequirements`), ensuring consistency across nodes.
+- **Decoupled prompts**: `SYSTEM_PROMPT`, `EXTRACTION_PROMPT` and `PROPOSAL_PROMPT` are
+  isolated in `prompts.py` to facilitate iteration without touching the business logic.
+
+## Roadmap
+
+<table>
+  <thead>
+    <tr><th>Feature</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Pydantic configuration + module scaffolding</td><td>✅ Done</td></tr>
+    <tr><td>Async Infracost client + mock + cache</td><td>✅ Done</td></tr>
+    <tr><td>Conversational agent with state machine</td><td>✅ Done</td></tr>
+    <tr><td>LangGraph orchestration with streaming</td><td>✅ Done</td></tr>
+    <tr><td>Terraform generation with templates and validation loop</td><td>🔄 In progress</td></tr>
+    <tr><td>Cost diff visualisation in Streamlit</td><td>🔄 In progress</td></tr>
+    <tr><td>Public demo deployment</td><td>🔄 In progress</td></tr>
+  </tbody>
+</table>

@@ -1,0 +1,97 @@
+---
+title: "TerraBot - Infrastructure as Conversation"
+date: "2026-04-30"
+description: "Chatbot qui convertit des besoins d'infrastructure cloud en Terraform, avec estimation des coûts en temps réel."
+tags: ["LangGraph", "Terraform", "GraphQL", "LLM", "Python", "Streamlit"]
+github_url: "https://github.com/Corentinjst/TerraBot"
+cover_image: "/images/projects/terrabot.jpg"
+featured: true
+---
+
+## Contexte
+
+Projet visant à simplifier le provisionnement d'infrastructure cloud grâce à un
+**agent conversationnel**. L'idée : remplacer la configuration manuelle de fichiers
+Terraform par un dialogue en langage naturel, tout en fournissant des **estimations de
+coûts comparatives** sur AWS, GCP et Azure avant tout déploiement.
+
+## Problématique
+
+La création d'infrastructure cloud via Terraform exige une expertise technique poussée :
+connaissance des providers, des ressources disponibles, des contraintes de pricing et des
+bonnes pratiques d'architecture. Ce ticket d'entrée élevé freine les équipes qui souhaitent
+déployer rapidement sans spécialiste DevOps dédié.
+
+## Solution
+
+Un agent LLM orchestré par **LangGraph** qui guide l'utilisateur à travers une conversation
+structurée, extrait les exigences d'architecture, compare les coûts entre providers et génère
+le fichier `.tf` correspondant :
+
+- **Collecte de besoins** : l'agent pose les bonnes questions pour extraire le provider cible,
+  la région, les services requis, le budget et les contraintes de disponibilité.
+- **Estimation de coûts** : requêtes à l'**API GraphQL Infracost** pour pricer l'architecture
+  candidate en temps réel sur les trois grands clouds.
+- **Proposition argumentée** : synthèse du design le plus adapté avec justification du choix
+  du provider et projection de coût mensuel.
+- **Génération Terraform** : production d'un fichier `.tf` validé par `terraform validate`,
+  déclenché seulement après confirmation explicite de l'utilisateur.
+- **Streaming live** : les tokens LLM sont streamés directement dans l'interface Streamlit
+  pour une expérience fluide et réactive.
+
+## Architecture
+
+<table>
+  <thead>
+    <tr><th>Couche</th><th>Technologies</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>LLM</td><td>Claude (Anthropic API) via langchain-anthropic</td></tr>
+    <tr><td>Orchestration</td><td>LangGraph - graph d'état avec routage conditionnel</td></tr>
+    <tr><td>UI</td><td>Streamlit avec streaming de tokens</td></tr>
+    <tr><td>Pricing API</td><td>Infracost GraphQL (+ mock offline)</td></tr>
+    <tr><td>HTTP / GraphQL</td><td>gql + httpx (client async)</td></tr>
+    <tr><td>IaC</td><td>Terraform + terraform validate</td></tr>
+    <tr><td>Config & validation</td><td>pydantic-settings, Pydantic v2</td></tr>
+    <tr><td>Tests</td><td>pytest + pytest-asyncio</td></tr>
+  </tbody>
+</table>
+
+## Pipeline de l'agent
+
+L'agent progresse à travers cinq nœuds explicites avec routage conditionnel :
+
+- **`gather_requirements`** - dialogue multi-tour pour extraire les besoins (provider, région,
+  services, budget, SLA).
+- **`fetch_pricing`** - requêtes Infracost pour chiffrer les architectures candidates sur AWS,
+  GCP et Azure.
+- **`propose_architecture`** - synthèse du design optimal avec comparatif de coûts et
+  justification.
+- **`await_confirmation`** - point de validation explicite avant toute génération de code.
+- **`generate_terraform`** - production et validation du fichier `.tf` final.
+
+## Points techniques notables
+
+- **Mode mock Infracost** : un client mock réaliste permet de développer et démo-er
+  sans clé API, avec bascule par variable d'environnement (`USE_MOCK_INFRACOST=true`).
+- **GraphState typé** : l'état de la conversation est modélisé avec des types Pydantic stricts
+  (`GraphState`, `ArchitectureRequirements`), garantissant la cohérence entre les nœuds.
+- **Prompts découplés** : `SYSTEM_PROMPT`, `EXTRACTION_PROMPT` et `PROPOSAL_PROMPT` sont
+  isolés dans `prompts.py` pour faciliter l'itération sans toucher à la logique métier.
+
+## Roadmap
+
+<table>
+  <thead>
+    <tr><th>Fonctionnalité</th><th>Statut</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Configuration Pydantic + squelette des modules</td><td>✅ Terminé</td></tr>
+    <tr><td>Client Infracost async + mock + cache</td><td>✅ Terminé</td></tr>
+    <tr><td>Agent conversationnel avec machine à états</td><td>✅ Terminé</td></tr>
+    <tr><td>Orchestration LangGraph avec streaming</td><td>✅ Terminé</td></tr>
+    <tr><td>Génération Terraform avec templates et boucle de validation</td><td>🔄 En cours</td></tr>
+    <tr><td>Visualisation du diff de coûts dans Streamlit</td><td>🔄 En cours</td></tr>
+    <tr><td>Déploiement démo public</td><td>🔄 En cours</td></tr>
+  </tbody>
+</table>
