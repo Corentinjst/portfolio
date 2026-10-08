@@ -1,5 +1,6 @@
 'use client'
 
+import { useLocale } from 'next-intl'
 import ContentModal from './ContentModal'
 import Icon from '@/components/ui/Icon'
 import type { Project } from '@/types'
@@ -12,6 +13,9 @@ interface ProjectModalProps {
 }
 
 export default function ProjectModal({ project, mdxContent, open, onClose }: ProjectModalProps) {
+  const locale = useLocale()
+  const dateFormatLocale = locale === 'en' ? 'en-US' : 'fr-FR'
+
   return (
     <ContentModal open={open} onClose={onClose}>
       {/* Tags */}
@@ -32,7 +36,7 @@ export default function ProjectModal({ project, mdxContent, open, onClose }: Pro
       {/* Date */}
       <p className="meta mb-6">
         <time dateTime={project.date}>
-          {new Date(project.date).toLocaleDateString('fr-FR', {
+          {new Date(project.date).toLocaleDateString(dateFormatLocale, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',

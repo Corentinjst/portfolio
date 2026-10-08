@@ -30,7 +30,8 @@
     "ctaLinkedIn": "LinkedIn",
     "ctaGithub": "GitHub",
     "ctaContact": "Contact",
-    "ctaCv": "CV"
+    "ctaCv": "CV",
+    "scrollCue": "Scroll down to see more"
   },
   "Parcours": {
     "sectionLabel": "Experience",
@@ -39,8 +40,11 @@
     "experiences": [
       {
         "period": "March 2025 - Present",
-        "title": "Data Scientist Apprentice",
-        "company": "CCF, La Défense, Courbevoie",
+        "title": "Data Scientist",
+        "company": "CCF",
+        "logo": "/images/logos/ccf.jpg",
+        "location": "La Défense, France",
+        "contract": "Apprenticeship",
         "preview": "Measured CRM campaigns' performance and detected flows to crypto platforms using NLP.",
         "role": "As part of the CCF Data team, I work on two main areas: evaluating the true impact of CRM campaigns on customer behavior, and detecting financial flows to cryptocurrency platforms for regulatory compliance (KYC) purposes.",
         "responsibilities": [
@@ -58,8 +62,11 @@
       },
       {
         "period": "Sept. 2024 - March 2025",
-        "title": "Data Project Assistant Apprentice",
-        "company": "CCF, La Défense, Courbevoie",
+        "title": "Data Project Assistant",
+        "company": "CCF",
+        "logo": "/images/logos/ccf.jpg",
+        "location": "La Défense, France",
+        "contract": "Apprenticeship",
         "preview": "Designed and deployed a Power BI dashboard for operational monitoring of CRM campaigns, updated daily.",
         "role": "My first assignment at CCF Bank, where I joined the CRM team. I built a multi-channel campaign performance tracking tool that became the team’s go-to solution for daily operational monitoring.",
         "responsibilities": [
@@ -74,8 +81,11 @@
       },
       {
         "period": "June 2023 - August 2023",
-        "title": "Data Analyst Intern",
-        "company": "SIPLEC E.LECLERC, Ivry-sur-Seine",
+        "title": "Data Analyst",
+        "company": "SIPLEC E.LECLERC",
+        "logo": "/images/logos/siplec.jpg",
+        "location": "Ivry-sur-Seine, France",
+        "contract": "Internship",
         "preview": "Designed and deployed a Qlik Sense dashboard to monitor IT support activity within the Information Systems department.",
         "role": "As part of the IT application support team, working closely with business teams, I designed and developed an operational monitoring tool to track service quality in real time and identify bottlenecks in request handling.",
         "responsibilities": [
@@ -92,13 +102,11 @@
   },
   "ProjectsSection": {
     "sectionLabel": "Portfolio",
-    "sectionTitle": "My projects",
-    "sectionDescription": "Real problems, real data, measurable results."
+    "sectionTitle": "My projects"
   },
   "BlogSection": {
     "sectionLabel": "Blog",
-    "sectionTitle": "Articles",
-    "sectionDescription": "Field notes, tutorials and reflections on Data Science in production."
+    "sectionTitle": "Articles"
   },
   "ProjectCard": {
     "viewGithub": "GitHub",
@@ -108,7 +116,6 @@
     "demoAriaLabel": "View demo"
   },
   "BlogCard": {
-    "readingTime": "{minutes} min read",
     "readArticle": "Read article →"
   },
   "ExperienceItem": {
@@ -127,7 +134,6 @@
   },
   "BlogPost": {
     "back": "← Back to articles",
-    "readingTime": "{minutes} min read",
     "notFound": "Article not found"
   }
 }

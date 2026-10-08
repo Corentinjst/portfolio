@@ -15,11 +15,6 @@ const FALLBACK_LOCALE = 'fr'
 
 export type ContentLocale = 'fr' | 'en'
 
-function calculateReadingTime(content: string): number {
-  const words = content.trim().split(/\s+/).length
-  return Math.ceil(words / 200)
-}
-
 const mdxOptions = {
   mdxOptions: {
     remarkPlugins: [remarkGfm],
@@ -125,7 +120,6 @@ export async function getAllBlogPosts(locale: ContentLocale = FALLBACK_LOCALE): 
       date: typeof data.date === 'string' ? data.date : '',
       description: typeof data.description === 'string' ? data.description : '',
       tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
-      readingTime: calculateReadingTime(content),
     })
   }
 
@@ -158,7 +152,6 @@ export async function getBlogPostBySlug(
     date: typeof data.date === 'string' ? data.date : '',
     description: typeof data.description === 'string' ? data.description : '',
     tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
-    readingTime: calculateReadingTime(content),
   }
 
   return { meta, mdxContent }

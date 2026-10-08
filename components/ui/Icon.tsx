@@ -2,6 +2,12 @@
 // pour éviter toute requête externe.
 
 const PATHS = {
+  'arrow-down': (
+    <>
+      <path d="M12 5v14" />
+      <path d="m19 12-7 7-7-7" />
+    </>
+  ),
   'arrow-left': (
     <>
       <path d="m12 19-7-7 7-7" />

@@ -22,8 +22,6 @@ export default function BlogModal({ post, mdxContent, open, onClose }: BlogModal
             day: 'numeric',
           })}
         </time>
-        {' · '}
-        {post.readingTime} min de lecture
       </p>
 
       <h2 className="m-0 mb-4 text-[26px] sm:text-[32px] font-medium leading-[1.15] tracking-heading [text-wrap:balance]">

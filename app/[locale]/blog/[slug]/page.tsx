@@ -66,8 +66,6 @@ export default async function BlogPostPage({ params }: Props) {
               day: 'numeric',
             })}
           </time>
-          {' · '}
-          {t('readingTime', { minutes: meta.readingTime })}
         </p>
 
         <h1 className="m-0 text-[36px] sm:text-[52px] font-medium leading-[1.06] tracking-display text-fg [text-wrap:balance]">

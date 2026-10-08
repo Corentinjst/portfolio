@@ -281,18 +281,6 @@
     border-color: var(--tag-accent-border, rgba(91, 127, 204, .28));
   }
 
-  .tag-solid {
-    color: var(--ink-950);
-    background: var(--fog-50);
-    border-color: transparent;
-  }
-
-  .tag-overlay {
-    background: rgba(5, 7, 10, .55);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
   /* ---------- Aurora backdrop ---------- */
   .aurora-orb {
     position: absolute;
@@ -323,6 +311,13 @@
     from {
       opacity: 0;
       transform: translateY(12px) scale(.98);
+    }
+  }
+
+  /* ---------- Hero scroll cue ---------- */
+  @keyframes cj-nudge {
+    50% {
+      transform: translateY(4px);
     }
   }
 

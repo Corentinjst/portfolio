@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import Icon from '@/components/ui/Icon'
 import Reveal from '@/components/ui/Reveal'
+import ScrollCue from './ScrollCue'
 
 export default function Hero() {
   const t = useTranslations('Hero')
@@ -9,7 +10,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="max-w-container mx-auto w-full px-[clamp(20px,4vw,40px)] min-h-[calc(100vh-120px)] grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-12 items-center py-12 lg:py-16"
+      className="relative max-w-container mx-auto w-full px-[clamp(20px,4vw,40px)] min-h-[calc(100vh-120px)] grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-12 items-center py-12 lg:pt-16 lg:pb-24"
     >
       {/* Left — text content */}
       <div className="order-2 lg:order-1 flex flex-col gap-6">
@@ -95,6 +96,8 @@ export default function Hero() {
           </div>
         </div>
       </Reveal>
+
+      <ScrollCue targetId="parcours" label={t('scrollCue')} />
     </section>
   )
 }

@@ -40,6 +40,22 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [isHome])
 
+  // Retire l'ancre (#blog...) de l'URL une fois la section atteinte :
+  // sinon un rechargement ramène toujours sur cette section au lieu du Hero.
+  useEffect(() => {
+    if (!isHome || !window.location.hash) return
+    function clearHash() {
+      const { pathname: path, search } = window.location
+      window.history.replaceState(window.history.state, '', path + search)
+    }
+    if (document.readyState === 'complete') {
+      const frame = requestAnimationFrame(clearHash)
+      return () => cancelAnimationFrame(frame)
+    }
+    window.addEventListener('load', clearHash, { once: true })
+    return () => window.removeEventListener('load', clearHash)
+  }, [isHome])
+
   const currentId = isHome ? activeId : pathname.startsWith('/blog') ? 'blog' : null
 
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {

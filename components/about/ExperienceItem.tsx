@@ -1,6 +1,7 @@
 'use client'
 
 import { useId, useState } from 'react'
+import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import Icon from '@/components/ui/Icon'
 import Reveal from '@/components/ui/Reveal'
@@ -9,6 +10,11 @@ export interface Experience {
   period: string
   title: string
   company: string
+  /** Chemin du logo dans /public */
+  logo?: string
+  /** Type de contrat (stage, alternance...) */
+  contract: string
+  location?: string
   preview: string
   role: string
   responsibilities: string[]
@@ -76,12 +82,31 @@ export default function ExperienceItem({ experience, current = false, revealDela
           aria-controls={detailsId}
         >
           <p className={`md:hidden meta mb-2 ${current ? '!text-accent' : ''}`}>{experience.period}</p>
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 sm:gap-4">
+            {experience.logo && (
+              <Image
+                src={experience.logo}
+                alt=""
+                width={48}
+                height={48}
+                className="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-ds-md border border-line object-cover"
+              />
+            )}
             <div className="flex-1 min-w-0">
               <h3 className="m-0 text-xl sm:text-2xl font-medium leading-[1.2] tracking-heading text-fg">
                 {experience.title}
+                <span className="font-normal text-accent">
+                  <span aria-hidden="true" className="text-fg-muted">
+                    {' · '}
+                  </span>
+                  <span className="sr-only">, </span>
+                  <span className="whitespace-nowrap">{experience.company}</span>
+                </span>
               </h3>
-              <p className="mt-1.5 text-sm text-fg-muted">{experience.company}</p>
+              <p className="mt-1.5 text-sm text-fg-muted">
+                {experience.contract}
+                {experience.location && ` · ${experience.location}`}
+              </p>
             </div>
             <span
               className={`mt-1 transition-transform duration-[240ms] ease-ds-out ${

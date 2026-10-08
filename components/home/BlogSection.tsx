@@ -17,7 +17,6 @@ export default function BlogSection({ posts }: BlogSectionProps) {
         index="02"
         eyebrow={t('sectionLabel')}
         title={t('sectionTitle')}
-        description={t('sectionDescription')}
       />
 
       {/* List */}

@@ -11,19 +11,15 @@ interface ProjectCardProps {
   onClick?: () => void
 }
 
-const MAX_TAGS = 4
-
 const cardClassName =
   'group glass glass-interactive flex flex-col h-full p-2 rounded-ds-xl text-fg cursor-pointer glass-lift'
 
 export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   const t = useTranslations('ProjectCard')
-  const shownTags = project.tags.slice(0, MAX_TAGS)
-  const extraTags = project.tags.length - shownTags.length
 
   const cardContent = (
     <>
-      {/* Cover image + tags */}
+      {/* Cover image */}
       <div
         className="relative aspect-[16/10] overflow-hidden rounded-[calc(var(--radius-xl)-8px)] border border-line"
         style={{ background: 'linear-gradient(135deg, var(--ink-800), var(--ink-900))' }}
@@ -37,18 +33,19 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         )}
-        <div className="absolute left-2.5 right-2.5 bottom-2.5 flex flex-wrap gap-1.5">
-          {shownTags.map((tag) => (
-            <span key={tag} className="tag tag-sm tag-overlay">
-              {tag}
-            </span>
-          ))}
-          {extraTags > 0 && <span className="tag tag-sm tag-solid">+{extraTags}</span>}
-        </div>
       </div>
 
       {/* Content */}
       <div className="flex flex-col flex-1 gap-2 px-3.5 pt-[18px] pb-2.5">
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1.5 mb-1">
+          {project.tags.map((tag) => (
+            <span key={tag} className="tag tag-sm">
+              {tag}
+            </span>
+          ))}
+        </div>
+
         {/* Title */}
         <h3 className="m-0 text-xl font-medium leading-[1.25] tracking-heading [text-wrap:balance]">
           {project.title}

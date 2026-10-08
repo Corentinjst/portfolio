@@ -27,7 +27,6 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
         index="03"
         eyebrow={t('sectionLabel')}
         title={t('sectionTitle')}
-        description={t('sectionDescription')}
       />
 
       {/* Grid */}

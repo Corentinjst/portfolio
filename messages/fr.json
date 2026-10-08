@@ -30,7 +30,8 @@
     "ctaLinkedIn": "LinkedIn",
     "ctaGithub": "GitHub",
     "ctaContact": "Contact",
-    "ctaCv": "CV"
+    "ctaCv": "CV",
+    "scrollCue": "Faire défiler pour voir la suite"
   },
   "Parcours": {
     "sectionLabel": "Expérience",
@@ -39,8 +40,11 @@
     "experiences": [
       {
         "period": "Mars 2025 - Aujourd'hui",
-        "title": "Alternant Data Scientist",
-        "company": "CCF, La Défense, Courbevoie",
+        "title": "Data Scientist",
+        "company": "CCF",
+        "logo": "/images/logos/ccf.jpg",
+        "location": "La Défense, France",
+        "contract": "Alternance",
         "preview": "Mesure de la performance des campagnes CRM et détection de flux vers plateformes crypto via NLP.",
         "role": "Au sein de l'équipe Data du CCF, j'interviens sur deux axes principaux : l'évaluation de l'impact réel des campagnes CRM sur le comportement client, et la détection de flux financiers vers des plateformes de cryptomonnaies à des fins de conformité réglementaire (KYC).",
         "responsibilities": [
@@ -58,8 +62,11 @@
       },
       {
         "period": "Sept. 2024 - Mars 2025",
-        "title": "Alternant Assistant Chef de Projet Data",
-        "company": "CCF, La Défense, Courbevoie",
+        "title": "Assistant Chef de Projet Data",
+        "company": "CCF",
+        "logo": "/images/logos/ccf.jpg",
+        "location": "La Défense, France",
+        "contract": "Alternance",
         "preview": "Conception et déploiement d'un dashboard Power BI de monitoring opérationnel des campagnes CRM, actualisé quotidiennement.",
         "role": "Première mission au sein de CCF Banque, intégré à l'équipe CRM. J'ai construit un outil de suivi de la performance des campagnes multicanales, devenu référence interne pour le pilotage quotidien des équipes CRM.",
         "responsibilities": [
@@ -74,8 +81,11 @@
       },
       {
         "period": "Juin 2023 - Août 2023",
-        "title": "Stagiaire Data Analyst",
-        "company": "SIPLEC E.LECLERC, Ivry-sur-Seine",
+        "title": "Data Analyst",
+        "company": "SIPLEC E.LECLERC",
+        "logo": "/images/logos/siplec.jpg",
+        "location": "Ivry-sur-Seine, France",
+        "contract": "Stage",
         "preview": "Conception et déploiement d'un dashboard Qlik Sense de pilotage de l'activité support au sein de la DSI.",
         "role": "Au sein de l'équipe support applicatif de la DSI, en soutien aux équipes métiers, j'ai conçu et développé un outil de monitoring opérationnel permettant de suivre en temps réel la qualité de service et d'identifier les goulots d'étranglement dans le traitement des demandes.",
         "responsibilities": [
@@ -92,13 +102,11 @@
   },
   "ProjectsSection": {
     "sectionLabel": "Portfolio",
-    "sectionTitle": "Mes projets",
-    "sectionDescription": "Des problèmes réels, des données réelles, des résultats mesurables."
+    "sectionTitle": "Mes projets"
   },
   "BlogSection": {
     "sectionLabel": "Blog",
-    "sectionTitle": "Articles",
-    "sectionDescription": "Retours d'expérience, tutoriels et réflexions sur la Data Science en production."
+    "sectionTitle": "Articles"
   },
   "ProjectCard": {
     "viewGithub": "GitHub",
@@ -108,7 +116,6 @@
     "demoAriaLabel": "Voir la démo"
   },
   "BlogCard": {
-    "readingTime": "{minutes} min de lecture",
     "readArticle": "Lire l'article →"
   },
   "ExperienceItem": {
@@ -127,7 +134,6 @@
   },
   "BlogPost": {
     "back": "← Retour aux articles",
-    "readingTime": "{minutes} min de lecture",
     "notFound": "Article introuvable"
   }
 }
