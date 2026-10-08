@@ -24,14 +24,14 @@
     "subtitleHighlight1": "Data",
     "subtitleConnector": " & ",
     "subtitleHighlight2": "AI",
-    "bioParagraph1": "An engineering graduate of ESILV with a specialisation in Data & Artificial Intelligence, I am now continuing my studies in the IASD Master’s programme (Artificial Intelligence, Systems, Data) at Université Paris Dauphine-PSL.",
-    "bioParagraph2": "Alongside my studies, I work as a Solution Engineer at ChapsVision on ArgonOS, a large-scale data processing platform used by public and private organisations: deploying it on client sites, developing ETL and AI components, and providing technical support on projects.",
-    "bioParagraph3": "Before that, I spent two years as a Data Scientist apprentice at CCF, working on causal evaluation of CRM campaigns and NLP classification of banking transactions.",
+    "bioParagraph1": "I graduated from ESILV as an engineer specialising in Data & AI, and I’m now in the final year of the IASD Master’s (AI, Systems, Data) at Université Paris Dauphine-PSL.",
+    "bioParagraph2": "Alongside my studies, I work as a Solution Engineer at ChapsVision on ArgonOS, a large-scale data processing platform used by public and private organisations. I deploy it at client sites, build ETL and AI components, and provide technical support throughout client projects.",
+    "bioParagraph3": "Before that, I spent two years at CCF as an apprentice Data Scientist, measuring the causal impact of CRM campaigns and classifying banking transactions with NLP.",
     "ctaLinkedIn": "LinkedIn",
     "ctaGithub": "GitHub",
     "ctaContact": "Contact",
     "ctaCv": "CV",
-    "scrollCue": "Scroll down to see more"
+    "scrollCue": "Scroll for more"
   },
   "Parcours": {
     "sectionLabel": "Experience",
