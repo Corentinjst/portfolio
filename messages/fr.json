@@ -1,9 +1,9 @@
 {
   "Metadata": {
-    "title": "Corentin Juste - Data Scientist",
+    "title": "Corentin Juste - Solution Engineer",
     "titleTemplate": "%s | Corentin Juste",
     "description": "Portfolio de Corentin Juste",
-    "siteName": "Corentin Juste - Data Scientist",
+    "siteName": "Corentin Juste - Solution Engineer",
     "ogLocale": "fr_FR"
   },
   "Navbar": {
@@ -20,13 +20,13 @@
   },
   "Hero": {
     "title": "Corentin Juste",
-    "subtitlePrefix": "Data Scientist · ",
-    "subtitleHighlight1": "Machine Learning",
+    "subtitlePrefix": "Solution Engineer · ",
+    "subtitleHighlight1": "Data",
     "subtitleConnector": " & ",
-    "subtitleHighlight2": "NLP",
-    "bioParagraph1": "Data Scientist avec deux ans d'expérience en alternance dans le secteur bancaire, j'ai eu la chance de travailler sur des problématiques où les données ont un impact business direct : évaluation de l'efficacité de campagnes commerciales, détection de transactions vers des plateformes crypto, ou encore optimisation et automatisation de reportings risque crédit et fraude.",
-    "bioParagraph2": "Ce qui me motive, c'est autant la profondeur technique d'un modèle bien conçu que l'impact qu'il peut avoir sur une décision métier opérationnelle. Le fait que ce domaine soit en perpétuelle évolution me fascine : les outils s'améliorent, et les solutions à construire deviennent de plus en plus ambitieuses. Cette nécessité de s'adapter en permanence représente pour moi autant un challenge intellectuel qu'une source de motivation constante.",
-    "bioParagraph3": "Aujourd'hui, je cherche un premier CDI en tant que Data Scientist ou AI Engineer, au sein d'un environnement stimulant dans lequel je pourrai continuer à progresser et m'attaquer à de nouveaux défis.",
+    "subtitleHighlight2": "IA",
+    "bioParagraph1": "Ingénieur diplômé de l'ESILV avec une spécialisation Data & Intelligence Artificielle, je poursuis aujourd'hui ma formation au sein du Master 2 IASD (Intelligence Artificielle, Systèmes, Données) de l'Université Paris Dauphine-PSL.",
+    "bioParagraph2": "En parallèle, je suis Solution Engineer chez ChapsVision, où je travaille sur ArgonOS, une plateforme de traitement massif de données utilisée par des acteurs publics et privés : déploiement chez les clients, développement de briques ETL et IA, et accompagnement technique des projets.",
+    "bioParagraph3": "Auparavant, j'ai passé deux ans en alternance au CCF en tant que Data Scientist, à travailler sur l'évaluation causale de campagnes CRM et sur la classification NLP de transactions bancaires.",
     "ctaLinkedIn": "LinkedIn",
     "ctaGithub": "GitHub",
     "ctaContact": "Contact",
@@ -39,14 +39,34 @@
     "helperText": "Cliquer sur une expérience pour voir les détails.",
     "experiences": [
       {
-        "period": "Mars 2025 - Aujourd'hui",
+        "period": "Sept. 2026 - Aujourd'hui",
+        "title": "Solution Engineer",
+        "company": "ChapsVision",
+        "logo": "/images/logos/chapsvision.jpeg",
+        "location": "Paris 9e, France",
+        "contract": "Alternance",
+        "preview": "Déploiement, configuration et enrichissement d'ArgonOS, plateforme souveraine de traitement massif de données.",
+        "role": "Au sein de l'équipe en charge d'ArgonOS, produit phare de ChapsVision, j'interviens sur le déploiement de la plateforme dans les environnements clients et sur son enrichissement technique. ArgonOS permet à des analystes, data scientists ou enquêteurs d'exploiter de larges volumes de données structurées et non structurées, pour des besoins régaliens comme privés.",
+        "responsibilities": [
+          "Déploiement et configuration d'ArgonOS dans les environnements clients (on-premise, dont air-gapped, et cloud)",
+          "Développement de briques ETL de la plateforme (Python, FastAPI), notamment sur ses capacités IA (machine learning, deep learning, NLP)",
+          "Évolution des interfaces web de la plateforme (React)",
+          "Déploiement de composants internes et suivi de leur état de santé (Docker, Kubernetes), enrichissement du monitoring (ElasticSearch, Grafana)",
+          "Analyse des besoins techniques clients, traduction en spécifications et réalisation des tests d'intégration et de recette",
+          "Rédaction de documentation technique et participation aux démonstrations et POC clients"
+        ],
+        "accomplishments": [],
+        "skills": ["Python", "FastAPI", "React", "Docker", "Kubernetes", "ElasticSearch", "Grafana", "NLP", "Git"]
+      },
+      {
+        "period": "Sept. 2024 - Août 2026",
         "title": "Data Scientist",
         "company": "CCF",
         "logo": "/images/logos/ccf.jpg",
         "location": "La Défense, France",
         "contract": "Alternance",
         "preview": "Mesure de la performance des campagnes CRM et détection de flux vers plateformes crypto via NLP.",
-        "role": "Au sein de l'équipe Data du CCF, j'interviens sur deux axes principaux : l'évaluation de l'impact réel des campagnes CRM sur le comportement client, et la détection de flux financiers vers des plateformes de cryptomonnaies à des fins de conformité réglementaire (KYC).",
+        "role": "Au sein de l'équipe Data du CCF, je suis intervenu sur deux axes principaux : l'évaluation de l'impact réel des campagnes CRM sur le comportement client, et la détection de flux financiers vers des plateformes de cryptomonnaies à des fins de conformité réglementaire (KYC).",
         "responsibilities": [
           "Conception d'une méthodologie d'évaluation causale des campagnes CRM, rendue nécessaire par l'absence de groupes témoins dans les ciblages de l'équipe",
           "Construction mensuelle de groupes de contrôle artificiels par Propensity Score Matching (PSM) pour reconstituer a posteriori un contrefactuel et isoler l'effet propre des campagnes",
@@ -59,25 +79,6 @@
           "Déploiement d'un modèle NLP de classification de transactions bancaires opérationnel en production"
         ],
         "skills": ["Python", "SQL", "NLP", "Scikit-learn", "Propensity Score Matching", "Power BI", "Git"]
-      },
-      {
-        "period": "Sept. 2024 - Mars 2025",
-        "title": "Assistant Chef de Projet Data",
-        "company": "CCF",
-        "logo": "/images/logos/ccf.jpg",
-        "location": "La Défense, France",
-        "contract": "Alternance",
-        "preview": "Conception et déploiement d'un dashboard Power BI de monitoring opérationnel des campagnes CRM, actualisé quotidiennement.",
-        "role": "Première mission au sein de CCF Banque, intégré à l'équipe CRM. J'ai construit un outil de suivi de la performance des campagnes multicanales, devenu référence interne pour le pilotage quotidien des équipes CRM.",
-        "responsibilities": [
-          "Conception et déploiement d'un dashboard Power BI de monitoring opérationnel des campagnes CRM, actualisé quotidiennement",
-          "Suivi de bout en bout de la performance des envois sur tous les canaux : taux d'ouverture, taux de clic sur pièces jointes, désabonnements",
-          "Maintenance et évolution de l'outil en fonction des besoins remontés par l'équipe CRM"
-        ],
-        "accomplishments": [
-          "Dashboard adopté comme outil de référence interne pour le pilotage quotidien des campagnes par l'équipe CRM"
-        ],
-        "skills": ["SQL", "Power BI", "Data Visualisation", "Reporting"]
       },
       {
         "period": "Juin 2023 - Août 2023",
@@ -127,7 +128,7 @@
     "collapse": "Réduire"
   },
   "Footer": {
-    "copyright": "© {year} Corentin Juste - Data Scientist",
+    "copyright": "© {year} Corentin Juste - Solution Engineer",
     "githubAriaLabel": "GitHub",
     "linkedinAriaLabel": "LinkedIn",
     "emailAriaLabel": "Email"
