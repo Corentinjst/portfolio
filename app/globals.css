@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 /* ------------------------------------------------------------------
-   Design tokens — Corentin Juste design system, thème "Clarity"
-   (cobalt → argent). Les valeurs de base sont surchargées par
-   [data-theme="clarity"], appliqué sur <html>.
+   Design tokens — Corentin Juste design system, thème "Marine"
+   (marine sombre, accent bleu poudré). Les valeurs de base sont
+   surchargées par [data-theme="marine"], appliqué sur <html>.
    ------------------------------------------------------------------ */
 @layer base {
   :root {
@@ -47,31 +47,28 @@
     --backdrop-glass-strong: blur(40px) saturate(180%);
     --shadow-glass: inset 0 1px 0 0 var(--glass-highlight), 0 1px 2px rgba(0, 0, 0, .25), 0 20px 50px -20px rgba(0, 0, 0, .6);
     --shadow-glass-lg: inset 0 1px 0 0 var(--glass-highlight), 0 2px 4px rgba(0, 0, 0, .25), 0 40px 90px -30px rgba(0, 0, 0, .75);
-    --shadow-accent-glow: 0 0 0 1px rgba(108, 239, 192, .4), 0 10px 40px -10px rgba(108, 239, 192, .55);
+    --shadow-accent-glow: 0 0 0 1px rgba(146, 168, 200, .3), 0 10px 30px -12px rgba(146, 168, 200, .4);
     --ease-out: cubic-bezier(.22, 1, .36, 1);
     --ease-in-out: cubic-bezier(.65, 0, .35, 1);
     --dur-fast: 140ms; --dur-base: 240ms; --dur-slow: 520ms;
   }
 
-  [data-theme='clarity'] {
-    --ink-950: #0b2a7a; --ink-900: #1a45b0; --ink-850: #2550b8; --ink-800: #3a63c4; --ink-700: #8da6dd; --ink-600: #b4c4e8;
-    --fog-50: #ffffff; --fog-200: #eef2fb; --fog-400: #dce4f6; --fog-500: #c3cfec;
-    --navy-200: #ffffff; --navy-300: #ffffff; --navy-400: #ffffff; --navy-500: #dce5f8; --navy-700: #1440b8;
-    --aurora-navy: #0a2e9e; --aurora-teal: #dad7e3; --aurora-amber: #8faeea;
-    --aurora-o1: .75; --aurora-o2: .7; --aurora-o3: .55;
-    --aurora-base: linear-gradient(140deg, #0f3aae 0%, #1f4dbe 30%, #4e76cc 55%, #9fb4df 80%, #d6d3de 100%);
-    --aurora-vignette: transparent;
-    --glass-fill: rgba(30, 72, 190, .16); --glass-fill-strong: rgba(30, 72, 190, .24); --glass-fill-hover: rgba(30, 72, 190, .22);
-    --glass-border: rgba(255, 255, 255, .32); --glass-border-strong: rgba(255, 255, 255, .55); --glass-highlight: rgba(255, 255, 255, .45);
-    --glass-tint-navy: rgba(255, 255, 255, .16); --glass-scrim: rgba(14, 40, 120, .35);
-    --nav-fill: rgba(255, 255, 255, .14); --dialog-fill: rgba(26, 64, 176, .55); --tag-accent-border: rgba(255, 255, 255, .45);
-    --bg-page: #1f4dbe; --bg-raised: #2550b8; --surface-solid: #2550b8;
-    --text-primary: #ffffff; --text-secondary: #f1f4fc; --text-muted: #dce4f6; --text-on-accent: #0e36a0;
-    --accent: #ffffff; --accent-hover: #eef2fb; --accent-press: #dce5f8; --accent-soft: rgba(255, 255, 255, .16);
-    --focus-ring: rgba(255, 255, 255, .7);
-    --shadow-glass: inset 0 1px 0 0 var(--glass-highlight), 0 1px 2px rgba(10, 30, 100, .12), 0 20px 50px -20px rgba(10, 30, 100, .35);
-    --shadow-glass-lg: inset 0 1px 0 0 var(--glass-highlight), 0 2px 4px rgba(10, 30, 100, .12), 0 40px 90px -30px rgba(10, 30, 100, .45);
-    --shadow-accent-glow: 0 0 0 1px rgba(255, 255, 255, .6), 0 10px 40px -10px rgba(255, 255, 255, .6);
+  [data-theme='marine'] {
+    --ink-950: #0b0e13; --ink-900: #10141b; --ink-850: #151a22; --ink-800: #1b222c; --ink-700: #283140; --ink-600: #364052;
+    --fog-50: #eceff3; --fog-200: #c1c8d2; --fog-400: #8892a0; --fog-500: #68717e;
+    --navy-200: #d6e0ee; --navy-300: #b6c6dd; --navy-400: #92a8c8; --navy-500: #768cae; --navy-700: #28344a;
+
+    --aurora-navy: #1c2a40; --aurora-teal: #33445c; --aurora-amber: #4e5668;
+    --aurora-o1: .5; --aurora-o2: .35; --aurora-o3: .18;
+
+    --glass-tint-navy: rgba(146, 168, 200, .10);
+    --tag-accent-border: rgba(146, 168, 200, .3);
+    --nav-fill: rgba(16, 20, 27, .5);
+    --dialog-fill: rgba(21, 26, 34, .72);
+
+    --text-on-accent: #10141b;
+    --focus-ring: rgba(146, 168, 200, .5);
+    --shadow-accent-glow: 0 0 0 1px rgba(146, 168, 200, .3), 0 10px 30px -12px rgba(146, 168, 200, .4);
   }
 
   html {
@@ -93,9 +90,9 @@
     color: var(--ink-950);
   }
 
-  [data-theme='clarity'] ::selection {
-    background: #ffffff;
-    color: #0e36a0;
+  [data-theme='marine'] ::selection {
+    background: #92a8c8;
+    color: #10141b;
   }
 
   :focus-visible {
@@ -370,20 +367,20 @@
   }
 
   .hljs {
-    background: rgba(8, 22, 70, .72) !important;
-    color: #e2e8f8;
+    background: rgba(11, 14, 19, .72) !important;
+    color: #dfe5ee;
   }
 
   .hljs-comment,
   .hljs-quote {
-    color: #8ea3d6;
+    color: #7d8899;
     font-style: italic;
   }
 
   .hljs-keyword,
   .hljs-selector-tag,
   .hljs-addition {
-    color: #7dd3fc;
+    color: #92a8c8;
   }
 
   .hljs-number,
@@ -392,7 +389,7 @@
   .hljs-literal,
   .hljs-doctag,
   .hljs-regexp {
-    color: #bef264;
+    color: #a9c4a0;
   }
 
   .hljs-title,
@@ -400,7 +397,7 @@
   .hljs-name,
   .hljs-selector-id,
   .hljs-selector-class {
-    color: #fdba74;
+    color: #d9c29a;
   }
 
   .hljs-attribute,
@@ -409,7 +406,7 @@
   .hljs-template-variable,
   .hljs-class .hljs-title,
   .hljs-type {
-    color: #f9a8d4;
+    color: #c9a9b8;
   }
 
   .hljs-symbol,
@@ -420,12 +417,12 @@
   .hljs-selector-attr,
   .hljs-selector-pseudo,
   .hljs-link {
-    color: #c4b5fd;
+    color: #b0b8d6;
   }
 
   .hljs-built_in,
   .hljs-deletion {
-    color: #fda4af;
+    color: #d49a9a;
   }
 
   .hljs-emphasis {

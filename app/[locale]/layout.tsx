@@ -51,7 +51,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      data-theme="clarity"
+      data-theme="marine"
       className={`${GeistSans.variable} ${GeistMono.variable} dark`}
     >
       <body className="relative isolate font-sans antialiased min-h-screen flex flex-col">
