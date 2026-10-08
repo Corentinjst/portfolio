@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#0b0e13"/>
+  <rect x="1" y="1" width="62" height="62" rx="13" fill="none" stroke="#283140" stroke-width="2"/>
+  <text x="32" y="33" text-anchor="middle" dominant-baseline="central" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="-1.5" fill="#92a8c8">CJ</text>
+</svg>
