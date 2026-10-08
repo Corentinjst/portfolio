@@ -1,24 +1,14 @@
 import type { Metadata } from 'next'
-import { Inter, Sora } from 'next/font/google'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server'
 import '../globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import AuroraBackground from '@/components/ui/AuroraBackground'
 import { locales, type Locale } from '@/i18n'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-})
-
-const sora = Sora({
-  subsets: ['latin'],
-  variable: '--font-sora',
-  display: 'swap',
-})
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
@@ -61,9 +51,14 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${inter.variable} ${sora.variable} dark`}
+      data-theme="clarity"
+      className={`${GeistSans.variable} ${GeistMono.variable} dark`}
     >
-      <body className="bg-surface text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+      <body className="relative isolate font-sans antialiased min-h-screen flex flex-col">
+        <noscript>
+          <style>{'.reveal,.reveal>*{opacity:1!important;transform:none!important}'}</style>
+        </noscript>
+        <AuroraBackground />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Navbar />
           <main className="flex-1">{children}</main>

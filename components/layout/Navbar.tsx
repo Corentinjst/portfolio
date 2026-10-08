@@ -1,22 +1,46 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link, usePathname } from '@/navigation'
 import LocaleSwitcher from './LocaleSwitcher'
+import Icon from '@/components/ui/Icon'
+
+type NavHref = '/' | '/#parcours' | '/#blog' | '/#projets'
+
+const SECTION_IDS = ['hero', 'parcours', 'blog', 'projets'] as const
 
 export default function Navbar() {
   const t = useTranslations('Navbar')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [activeId, setActiveId] = useState<string>('hero')
   const pathname = usePathname()
   const isHome = pathname === '/'
 
-  const navLinks: { href: '/' | '/#parcours' | '/#blog' | '/#projets'; label: string }[] = [
-    { href: '/', label: t('home') },
-    { href: '/#parcours', label: t('parcours') },
-    { href: '/#blog', label: t('blog') },
-    { href: '/#projets', label: t('projects') },
+  const navLinks: { href: NavHref; id: (typeof SECTION_IDS)[number]; label: string }[] = [
+    { href: '/', id: 'hero', label: t('home') },
+    { href: '/#parcours', id: 'parcours', label: t('parcours') },
+    { href: '/#blog', id: 'blog', label: t('blog') },
+    { href: '/#projets', id: 'projets', label: t('projects') },
   ]
+
+  // Surligne la section actuellement visible (page d'accueil uniquement)
+  useEffect(() => {
+    if (!isHome) return
+    function onScroll() {
+      let current: string = 'hero'
+      for (const id of SECTION_IDS) {
+        const el = document.getElementById(id)
+        if (el && el.getBoundingClientRect().top < window.innerHeight * 0.4) current = id
+      }
+      setActiveId(current)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [isHome])
+
+  const currentId = isHome ? activeId : pathname.startsWith('/blog') ? 'blog' : null
 
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
     if (!isHome) return // let normal navigation happen
@@ -31,73 +55,75 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-surface-border">
-      <nav className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <header className="sticky top-4 z-50 w-full max-w-container mx-auto px-[clamp(20px,4vw,40px)] pt-4">
+      <nav
+        className="flex items-center gap-6 h-[60px] pl-[22px] pr-2 rounded-full border border-line"
+        style={{
+          background: 'var(--nav-fill, rgba(10,13,18,.45))',
+          boxShadow: 'var(--shadow-glass)',
+          backdropFilter: 'var(--backdrop-glass-strong)',
+          WebkitBackdropFilter: 'var(--backdrop-glass-strong)',
+        }}
+      >
         {/* Logo */}
         <Link
           href="/"
           onClick={(e) => handleClick(e, '/')}
-          className="font-heading font-bold text-lg text-slate-100 hover:text-accent transition-colors"
+          className="text-lg font-semibold tracking-[-0.04em] text-fg hover:text-fg"
         >
           Corentin<span className="text-accent">.</span>
         </Link>
 
+        <div className="flex-1" />
+
         {/* Desktop nav */}
-        <div className="hidden sm:flex items-center gap-8">
-          <ul className="flex items-center gap-8">
-            {navLinks.map((link) => (
+        <ul className="hidden sm:flex items-center gap-0.5">
+          {navLinks.map((link) => {
+            const isActive = currentId === link.id
+            return (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   onClick={(e) => handleClick(e, link.href)}
-                  className="text-sm font-medium transition-colors hover:text-accent text-slate-400"
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`block px-3.5 py-[9px] rounded-full text-sm font-medium leading-none transition-all duration-150 ease-ds-out ${
+                    isActive
+                      ? 'text-fg bg-[var(--glass-fill-strong)] shadow-[inset_0_1px_0_var(--glass-highlight)]'
+                      : 'text-fg-muted hover:text-fg'
+                  }`}
                 >
                   {link.label}
                 </Link>
               </li>
-            ))}
-          </ul>
-          <LocaleSwitcher />
-        </div>
+            )
+          })}
+        </ul>
+
+        <LocaleSwitcher />
 
         {/* Mobile hamburger */}
-        <div className="sm:hidden flex items-center gap-2">
-          <LocaleSwitcher />
-          <button
-            className="text-slate-400 hover:text-slate-100 transition-colors p-2"
-            onClick={() => setMenuOpen((prev) => !prev)}
-            aria-label={t('toggleMenu')}
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
-        </div>
+        <button
+          className="sm:hidden icon-btn icon-btn-sm"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          aria-label={t('toggleMenu')}
+          aria-expanded={menuOpen}
+        >
+          <Icon name={menuOpen ? 'x' : 'menu'} size={16} />
+        </button>
       </nav>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="sm:hidden border-t border-surface-border bg-surface">
-          <ul className="flex flex-col px-4 py-3 gap-4">
+        <div
+          className="sm:hidden mt-2 rounded-ds-lg border border-line"
+          style={{
+            background: 'var(--dialog-fill, rgba(15,19,26,.62))',
+            boxShadow: 'var(--shadow-glass-lg)',
+            backdropFilter: 'var(--backdrop-glass-strong)',
+            WebkitBackdropFilter: 'var(--backdrop-glass-strong)',
+          }}
+        >
+          <ul className="flex flex-col p-2 gap-1">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
@@ -106,7 +132,11 @@ export default function Navbar() {
                     setMenuOpen(false)
                     handleClick(e, link.href)
                   }}
-                  className="block text-sm font-medium transition-colors hover:text-accent text-slate-300"
+                  className={`block px-4 py-3 rounded-ds-md text-sm font-medium transition-colors ${
+                    currentId === link.id
+                      ? 'text-fg bg-[var(--glass-fill-strong)]'
+                      : 'text-fg-muted hover:text-fg'
+                  }`}
                 >
                   {link.label}
                 </Link>

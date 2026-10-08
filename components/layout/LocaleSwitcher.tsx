@@ -24,9 +24,9 @@ export default function LocaleSwitcher() {
     <div
       role="group"
       aria-label={t('label')}
-      className="inline-flex items-center rounded-md border border-surface-border bg-surface-elevated text-xs font-semibold overflow-hidden"
+      className="glass inline-flex items-center gap-0.5 p-[3px] rounded-full shadow-none"
     >
-      {locales.map((loc, index) => {
+      {locales.map((loc) => {
         const isActive = loc === locale
         return (
           <button
@@ -35,11 +35,11 @@ export default function LocaleSwitcher() {
             onClick={() => switchTo(loc)}
             disabled={isPending}
             aria-pressed={isActive}
-            className={`px-2.5 py-1 transition-colors ${
+            className={`h-[22px] px-3 rounded-full font-mono text-xs font-medium leading-none tracking-[.06em] transition-all duration-200 ease-ds-out ${
               isActive
-                ? 'bg-accent text-white'
-                : 'text-slate-400 hover:text-slate-100'
-            } ${index === 0 ? '' : 'border-l border-surface-border'}`}
+                ? 'bg-[var(--fog-50)] text-[var(--ink-950)]'
+                : 'text-fg-muted hover:text-fg'
+            }`}
           >
             {t(loc)}
           </button>

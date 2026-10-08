@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link } from '@/navigation'
+import Reveal from '@/components/ui/Reveal'
 import { getAllBlogPosts, getBlogPostBySlug, type ContentLocale } from '@/lib/mdx'
 import { locales } from '@/i18n'
 
@@ -47,58 +48,50 @@ export default async function BlogPostPage({ params }: Props) {
   const dateFormatLocale = locale === 'en' ? 'en-US' : 'fr-FR'
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+    <div className="max-w-[760px] mx-auto w-full px-[clamp(20px,4vw,40px)] py-16">
       {/* Back link */}
-      <Link
-        href="/#blog"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-accent transition-colors mb-10"
-      >
-        {t('back')}
-      </Link>
+      <Reveal>
+        <Link href="/#blog" className="btn btn-ghost -ml-3.5">
+          {t('back')}
+        </Link>
+      </Reveal>
 
-      {/* Meta info */}
-      <div className="flex items-center gap-3 mb-4">
-        <time
-          dateTime={meta.date}
-          className="text-sm text-slate-500"
-        >
-          {new Date(meta.date).toLocaleDateString(dateFormatLocale, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </time>
-        <span className="text-slate-600">·</span>
-        <span className="text-sm text-slate-500">
+      <Reveal delay={80}>
+        {/* Meta info */}
+        <p className="meta mt-10 mb-[18px]">
+          <time dateTime={meta.date}>
+            {new Date(meta.date).toLocaleDateString(dateFormatLocale, {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+          {' · '}
           {t('readingTime', { minutes: meta.readingTime })}
-        </span>
-      </div>
+        </p>
 
-      <h1 className="font-heading font-bold text-3xl sm:text-4xl text-slate-100 mb-4 leading-tight">
-        {meta.title}
-      </h1>
+        <h1 className="m-0 text-[36px] sm:text-[52px] font-medium leading-[1.06] tracking-display text-fg [text-wrap:balance]">
+          {meta.title}
+        </h1>
 
-      <p className="text-lg text-slate-400 mb-6">{meta.description}</p>
+        <p className="text-lg sm:text-xl leading-[1.55] text-fg-secondary my-6">{meta.description}</p>
 
-      {/* Tags */}
-      <div className="flex flex-wrap gap-2 mb-8">
-        {meta.tags.map((tag) => (
-          <span
-            key={tag}
-            className="px-2.5 py-1 text-xs rounded-full bg-surface border border-surface-border text-accent font-medium"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      {/* Divider */}
-      <div className="border-t border-surface-border mb-8" />
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1.5 pb-8 border-b border-line">
+          {meta.tags.map((tag) => (
+            <span key={tag} className="tag">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </Reveal>
 
       {/* MDX Content */}
-      <article className="prose prose-invert max-w-none">
-        {mdxContent}
-      </article>
-    </main>
+      <Reveal delay={160}>
+        <article className="prose prose-invert prose-lg max-w-none mt-10">
+          {mdxContent}
+        </article>
+      </Reveal>
+    </div>
   )
 }

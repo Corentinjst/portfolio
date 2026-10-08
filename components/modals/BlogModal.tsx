@@ -14,43 +14,35 @@ export default function BlogModal({ post, mdxContent, open, onClose }: BlogModal
   return (
     <ContentModal open={open} onClose={onClose}>
       {/* Meta info */}
-      <div className="flex items-center gap-3 mb-4">
-        <time
-          dateTime={post.date}
-          className="text-sm text-slate-500"
-        >
+      <p className="meta mb-4">
+        <time dateTime={post.date}>
           {new Date(post.date).toLocaleDateString('fr-FR', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
           })}
         </time>
-        <span className="text-slate-600">·</span>
-        <span className="text-sm text-slate-500">
-          {post.readingTime} min de lecture
-        </span>
-      </div>
+        {' · '}
+        {post.readingTime} min de lecture
+      </p>
 
-      <h2 className="font-heading font-bold text-2xl sm:text-3xl text-slate-100 mb-4 leading-tight">
+      <h2 className="m-0 mb-4 text-[26px] sm:text-[32px] font-medium leading-[1.15] tracking-heading [text-wrap:balance]">
         {post.title}
       </h2>
 
-      <p className="text-lg text-slate-400 mb-6">{post.description}</p>
+      <p className="text-base sm:text-lg leading-[1.55] text-fg-secondary mb-6">{post.description}</p>
 
       {/* Tags */}
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-1.5 mb-8">
         {post.tags.map((tag) => (
-          <span
-            key={tag}
-            className="px-2.5 py-1 text-xs rounded-full bg-surface border border-surface-border text-accent font-medium"
-          >
+          <span key={tag} className="tag">
             {tag}
           </span>
         ))}
       </div>
 
       {/* Divider */}
-      <div className="border-t border-surface-border mb-8" />
+      <div className="border-t border-line mb-8" />
 
       {/* MDX Content */}
       <article className="prose prose-invert max-w-none">
